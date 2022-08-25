@@ -1,0 +1,8 @@
+{% ckan_extends %}
+
+{% block scripts %}
+    {{ super() }}
+
+    {% set type = 'asset' if h.ckan_version().split('.')[1] | int >= 9 else 'resource' %}
+    {% include 'snippets/vsg_' ~ type ~ '.html' %}
+{% endblock %}
