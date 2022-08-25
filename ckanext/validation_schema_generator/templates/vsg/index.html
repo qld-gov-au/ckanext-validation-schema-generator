@@ -1,0 +1,62 @@
+{% extends "package/resource_edit_base.html" %}
+
+{% block subtitle %}
+    {{ h.dataset_display_name(pkg) }}
+    -
+    {{ h.resource_display_name(res) }}
+    -
+    {{ _('Generate schema') }}
+{% endblock %}
+
+{% block primary_content_inner %}
+    {% if not schema %}
+        <form method="post" action="validation_schema_generator.index" class="generate-schema">
+            <button class="btn btn-primary" name="save" type="submit">
+                <i class="fa fa-plus"></i>
+                {{ _('Generate JSON data scheme') }}
+            </button>
+        </form>
+    {% endif %}
+
+    {% if status.error and status.error.message %}
+        <div class="alert alert-error">
+            <strong>
+                {{ _('Error:') }}
+            </strong>
+            {{ status.error.message }}
+        </div>
+    {% endif %}
+
+    <table class="table table-bordered">
+        <colgroup>
+            <col width="150">
+            <col>
+        </colgroup>
+        <tr>
+            <th>
+                {{ _('Status') }}
+            </th>
+            <td>
+                {{ _('Not generated') }}
+            </td>
+        </tr>
+        <tr>
+            <th>
+                {{ _('Last updated') }}
+            </th>
+            {% if last_updated %}
+                <td>
+                    <span class="date" title="{{ h.render_datetime(status.last_updated, with_hours=True) }}">
+                        {{ h.time_ago_from_timestamp(last_updated) }}
+                    </span>
+                </td>
+            {% else %}
+                <td>
+                    {{ _('Never') }}
+                </td>
+            {% endif %}
+        </tr>
+    </table>
+
+
+{% endblock %}

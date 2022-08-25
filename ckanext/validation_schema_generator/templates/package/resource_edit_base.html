@@ -1,0 +1,9 @@
+{% ckan_extends %}
+
+{% block inner_primary_nav %}
+    {% if 'datastore' in g.plugins and res.datastore_active %}
+        {{ h.build_nav_icon('validation_schema_generator.index', _('Data Schema'), dataset_id=pkg.name, resource_id=res.id, icon='code') }}
+    {% endif %}
+
+    {{ super() }}
+{% endblock %}
