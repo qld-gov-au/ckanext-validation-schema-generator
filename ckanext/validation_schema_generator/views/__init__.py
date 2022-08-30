@@ -74,7 +74,7 @@ class VSGIndexView(MethodView):
     def _clean_if_applied_another_schema(self, task):
         """If another generated from resource schema is applied, clear this one"""
         apply_for = task['value'].get(APPLY_FOR_FIELD)
-        schema = json.loads(task['value'].get('schema', '{}'))
+        schema = json.loads(task['value'].get('schema') or '{}')
 
         if not apply_for or not schema:
             return
