@@ -1,28 +1,24 @@
 # encoding: utf-8
 
 from ckan.lib.base import BaseController
-import ckan.model as model
 import ckan.plugins.toolkit as tk
 
-from ckanext.validation_schema_generator.views import index
+from ckanext.validation_schema_generator.views import VSGIndexView
 
 
 class VSGController(BaseController):
-
-    def __before__(self, action, **params):
-        super(VSGController, self).__before__(action, **params)
-
-        context = {
-            'model': model,
-            'user': tk.c.user,
-            'auth_user_obj': tk.c.userobj
-        }
-
+    def _check_access(self, resource_id):
         try:
-            #TODO make proper check for editor, admin or sysadmin user
-            tk.check_access('sysadmin', context, {})
+            tk.check_access('vsg_generate', {}, {"id": resource_id})
         except tk.NotAuthorized:
             tk.abort(403, tk._(u'You are not allowed to generate resource schema'))
 
     def index(self, dataset_id, resource_id):
-        return index(dataset_id, resource_id)
+        self._check_access(resource_id)
+
+        view = VSGIndexView()
+
+        if tk.request.method == 'GET':
+            return view.get(dataset_id, resource_id)
+
+        return view.post(dataset_id, resource_id)

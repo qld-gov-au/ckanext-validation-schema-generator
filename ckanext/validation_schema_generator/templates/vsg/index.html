@@ -1,5 +1,11 @@
 {% extends "package/resource_edit_base.html" %}
 
+{% import 'macros/form.html' as form %}
+
+{% block maintag %}
+    <div role="main" class="schema-generate">
+{% endblock %}
+
 {% block subtitle %}
     {{ h.dataset_display_name(pkg) }}
     -
@@ -9,54 +15,85 @@
 {% endblock %}
 
 {% block primary_content_inner %}
-    {% if not schema %}
-        <form method="post" action="validation_schema_generator.index" class="generate-schema">
-            <button class="btn btn-primary" name="save" type="submit">
-                <i class="fa fa-plus"></i>
-                {{ _('Generate JSON data scheme') }}
-            </button>
-        </form>
+    {% if task.error %}
+        {% for err in task.error.values() %}
+            <div class="alert alert-error">
+                <strong>
+                    {{ _('Error:') }}
+                </strong>
+                {{ err }}
+            </div>
+        {% endfor %}
     {% endif %}
 
-    {% if status.error and status.error.message %}
-        <div class="alert alert-error">
-            <strong>
-                {{ _('Error:') }}
-            </strong>
-            {{ status.error.message }}
-        </div>
-    {% endif %}
+    <form method="post" action="{{ h.url_for('validation_schema_generator.index', dataset_id=pkg.name, resource_id=res.id) }}" class="generate-schema-form">
+        <button class="btn btn-primary btn-generate" name="generate" type="submit">
+            <i class="fa fa-plus"></i>
+            {{ _('Generate JSON data scheme') }}
+        </button>
 
-    <table class="table table-bordered">
-        <colgroup>
-            <col width="150">
-            <col>
-        </colgroup>
-        <tr>
-            <th>
-                {{ _('Status') }}
-            </th>
-            <td>
-                {{ _('Not generated') }}
-            </td>
-        </tr>
-        <tr>
-            <th>
-                {{ _('Last updated') }}
-            </th>
-            {% if last_updated %}
+        <table class="table table-bordered table-schema">
+            <colgroup>
+                <col width="150">
+                <col>
+            </colgroup>
+            <tr>
+                <th>
+                    {{ _('Status') }}
+                </th>
                 <td>
-                    <span class="date" title="{{ h.render_datetime(status.last_updated, with_hours=True) }}">
-                        {{ h.time_ago_from_timestamp(last_updated) }}
-                    </span>
+                    {{ task.state or _('Not generated') }}
                 </td>
-            {% else %}
-                <td>
-                    {{ _('Never') }}
-                </td>
+            </tr>
+            <tr>
+                <th>
+                    {{ _('Last updated') }}
+                </th>
+                {% if task.last_updated %}
+                    <td>
+                        <span class="date" title="{{ h.render_datetime(task.last_updated, with_hours=True) }}">
+                            {{ h.time_ago_from_timestamp(task.last_updated) }}
+                        </span>
+                    </td>
+                {% else %}
+                    <td>
+                        {{ _('Never') }}
+                    </td>
+                {% endif %}
+            </tr>
+
+            {% if task.value.schema %}
+                <tr>
+                    <th>
+                        {{ _('JSON data schema') }}
+                    </th>
+
+                    <td class="with-textarea">
+                        {{ form.textarea('schema', id='field-schema', value=task.value.schema, error=error) }}
+                    </td>
+                </tr>
             {% endif %}
-        </tr>
-    </table>
+        </table>
 
+        {% if task.value.schema %}
+            {% call form.select('apply_for', id='field-apply_for', label=_('Enable validation of resource/s using this data schema at the following level'), options=h.vsg_get_apply_for_options(), selected=task.value.apply_for) %}
+            <div class="info-block info-inline">
+                <p>
+                    <i class="fa fa-info-circle"></i>
+                    {{ _('Leaving blank will NOT change any pre-existing validation for this dataset or resource.') }}
+                </p>
+                <p>
+                    {{ _('Once applied as the `Dataset default`, all dataset resources, when edited or added, will be validated against this data schema.') }}
+                </p>
+                <p>
+                    {{ _('Once applied to only this `Resource`, saved edits will be validated against this data schema unless otherwise overwritten (e.g. Dataset default schema') }}
+                </p>
+            </div>
+            {% endcall %}
 
+            <button class="btn btn-primary btn-apply" name="apply" type="submit">
+                {{ _('Apply') }}
+            </button>
+        {% endif %}
+    </form>
 {% endblock %}
