@@ -1,73 +1,279 @@
-import pytest
-import mock
+import json
 
+import pytest
+
+import ckan.logic as logic
 from ckan.tests import helpers, factories
+
+import ckanext.validation_schema_generator.constants as const
 
 
 @pytest.mark.usefixtures("clean_db", "with_plugins")
-@pytest.mark.ckan_config("ckan.plugins", "datastore xloader")
-class TestAction(object):
-    pass
-    #TODO: implement action tests
-    # def test_submit(self):
-    #     # checks that xloader_submit enqueues the resource (to be xloadered)
-    #     user = factories.User()
-    #     # normally creating a resource causes xloader_submit to be called,
-    #     # but we avoid that by setting an invalid format
-    #     res = factories.Resource(user=user, format="aaa")
-    #     # mock the enqueue
-    #     with mock.patch(
-    #         "ckanext.xloader.action.enqueue_job",
-    #         return_value=mock.MagicMock(id=123),
-    #     ) as enqueue_mock:
-    #         helpers.call_action(
-    #             "xloader_submit",
-    #             context=dict(user=user["name"]),
-    #             resource_id=res["id"],
-    #         )
-    #         assert 1 == enqueue_mock.call_count
+class TestActionGenerate(object):
+
+    def test_not_in_datastore(self):
+        resource = factories.Resource()
+        err_msg = u"Schema couldn't be generated for this resource"
+
+        with pytest.raises(logic.ValidationError, match=err_msg):
+            helpers.call_action('vsg_generate', id=resource['id'])
+
+    def test_in_datastore(self):
+        resource = factories.Resource(datastore_active=True)
+        result = helpers.call_action('vsg_generate', id=resource['id'])
+
+        assert result["entity_id"] == resource["id"]
+        assert result["task_type"] == const.TASK_TYPE
+        assert result["entity_type"] == "resource"
+        assert result["value"]["job_id"]
+        assert result["state"] == const.TASK_STATE_PENDING
+        assert result["key"] == const.TASK_KEY
+
+    def test_missing_resource(self):
+        with pytest.raises(logic.ValidationError, match='Resource not found'):
+            helpers.call_action('vsg_generate', id='missing')
+
+    def test_res_id_not_provided(self):
+        with pytest.raises(logic.ValidationError, match='Missing value'):
+            helpers.call_action('vsg_generate')
 
 
-    # def test_xloader_hook(self):
-    #     # Check the task_status is stored correctly after a xloader job.
-    #     user = factories.User()
-    #     res = factories.Resource(user=user, format="csv")
-    #     task_status = helpers.call_action(
-    #         "task_status_update",
-    #         context={},
-    #         entity_id=res["id"],
-    #         entity_type="resource",
-    #         task_type="xloader",
-    #         key="xloader",
-    #         value="{}",
-    #         error="{}",
-    #         state="pending",
-    #     )
+@pytest.mark.usefixtures("clean_db", "with_plugins")
+class TestActionStatus(object):
 
-    #     helpers.call_action(
-    #         "xloader_hook",
-    #         context=dict(user=user["name"]),
-    #         metadata={"resource_id": res["id"]},
-    #         status="complete",
-    #     )
+    def test_generation_started(self):
+        resource = factories.Resource(datastore_active=True)
+        helpers.call_action('vsg_generate', id=resource['id'])
+        result = helpers.call_action('vsg_status', id=resource["id"])
 
-    #     task_status = helpers.call_action(
-    #         "task_status_show",
-    #         context={},
-    #         entity_id=res["id"],
-    #         task_type="xloader",
-    #         key="xloader",
-    #     )
-    #     assert task_status["state"] == "complete"
+        assert result["entity_id"] == resource["id"]
+        assert result["task_type"] == const.TASK_TYPE
+        assert result["entity_type"] == "resource"
+        assert result["value"]["job_id"]
+        assert result["state"] == const.TASK_STATE_PENDING
+        assert result["key"] == const.TASK_KEY
 
-    # def test_status(self):
+    def test_not_generated(self):
+        resource = factories.Resource()
+        result = helpers.call_action('vsg_status', id=resource["id"])
 
-    #     # Trigger an xloader job
-    #     res = factories.Resource(format="CSV")
+        assert result['state'] == const.TASK_STATE_NOT_GENERATED
+        assert not result['error']
+        assert not result['value']
+        assert not result['last_updated']
 
-    #     status = helpers.call_action(
-    #         "xloader_status",
-    #         resource_id=res["id"],
-    #     )
+    def test_res_id_not_provided(self):
+        with pytest.raises(logic.ValidationError, match='Missing value'):
+            helpers.call_action('vsg_status')
 
-    #     assert status['status'] == 'pending'
+
+@pytest.mark.usefixtures("clean_db", "with_plugins")
+class TestActionApply(object):
+
+    def test_apply_for_wrong_entity(self, table_schema):
+        resource = factories.Resource(datastore_active=True)
+        helpers.call_action('vsg_generate', id=resource['id'])
+
+        helpers.call_action('vsg_hook',
+                            id=resource["id"],
+                            status=const.TASK_STATE_FINISHED,
+                            error={},
+                            schema=table_schema)
+
+        with pytest.raises(logic.ValidationError):
+            helpers.call_action('vsg_apply',
+                                id=resource["id"],
+                                apply_for="organization",
+                                schema=table_schema)
+
+    def test_apply_for_resource(self, table_schema, sysadmin):
+        resource = factories.Resource(datastore_active=True)
+        helpers.call_action('vsg_generate', id=resource['id'])
+        helpers.call_action('vsg_hook',
+                            id=resource["id"],
+                            status=const.TASK_STATE_FINISHED,
+                            error={},
+                            schema=table_schema)
+        helpers.call_action('vsg_apply',
+                            id=resource["id"],
+                            apply_for=const.APPLY_FOR_RESOURCE,
+                            schema=table_schema)
+
+        resource = helpers.call_action("resource_show", id=resource["id"])
+        assert resource[const.RES_SCHEMA_FIELD]
+
+    def test_apply_for_package(self, table_schema):
+        resource = factories.Resource(datastore_active=True)
+        helpers.call_action('vsg_generate', id=resource['id'])
+        helpers.call_action('vsg_hook',
+                            id=resource["id"],
+                            status=const.TASK_STATE_FINISHED,
+                            error={},
+                            schema=table_schema)
+        helpers.call_action('vsg_apply',
+                            id=resource["id"],
+                            apply_for=const.APPLY_FOR_DATASET,
+                            schema=table_schema)
+
+        pkg = helpers.call_action("package_show", id=resource["package_id"])
+        assert pkg[const.PKG_SCHEMA_FIELD]
+
+    def test_apply_resource_must_unapply_pkg_schema(self, table_schema):
+        resource = factories.Resource(datastore_active=True)
+        helpers.call_action('vsg_generate', id=resource['id'])
+        helpers.call_action('vsg_hook',
+                            id=resource["id"],
+                            status=const.TASK_STATE_FINISHED,
+                            error={},
+                            schema=table_schema)
+        helpers.call_action('vsg_apply',
+                            id=resource["id"],
+                            apply_for=const.APPLY_FOR_RESOURCE,
+                            schema=table_schema)
+
+        resource = helpers.call_action("resource_show", id=resource["id"])
+        assert resource[const.RES_SCHEMA_FIELD]
+
+        helpers.call_action('vsg_apply',
+                            id=resource["id"],
+                            apply_for=const.APPLY_FOR_DATASET,
+                            schema=table_schema)
+
+        pkg = helpers.call_action("package_show", id=resource["package_id"])
+        assert pkg[const.PKG_SCHEMA_FIELD]
+        assert not pkg['resources'][0][const.RES_SCHEMA_FIELD]
+
+    def test_apply_resource_must_unapply_pkg_schema(self, table_schema):
+        resource = factories.Resource(datastore_active=True)
+
+        helpers.call_action('vsg_generate', id=resource['id'])
+        helpers.call_action('vsg_hook',
+                            id=resource["id"],
+                            status=const.TASK_STATE_FINISHED,
+                            error={},
+                            schema=table_schema)
+        helpers.call_action('vsg_apply',
+                            id=resource["id"],
+                            apply_for=const.APPLY_FOR_RESOURCE,
+                            schema=table_schema)
+
+        resource = helpers.call_action("resource_show", id=resource["id"])
+        assert resource[const.RES_SCHEMA_FIELD]
+
+        helpers.call_action('vsg_apply',
+                            id=resource["id"],
+                            apply_for=const.APPLY_FOR_DATASET,
+                            schema=table_schema)
+
+        pkg = helpers.call_action("package_show", id=resource["package_id"])
+        assert pkg[const.PKG_SCHEMA_FIELD]
+        assert not pkg['resources'][0][const.RES_SCHEMA_FIELD]
+
+    def test_apply_pkg_must_unapply_resource_schema(self, table_schema):
+        resource = factories.Resource(datastore_active=True)
+
+        helpers.call_action('vsg_generate', id=resource['id'])
+        helpers.call_action('vsg_hook',
+                            id=resource["id"],
+                            status=const.TASK_STATE_FINISHED,
+                            error={},
+                            schema=table_schema)
+        helpers.call_action('vsg_apply',
+                            id=resource["id"],
+                            apply_for=const.APPLY_FOR_DATASET,
+                            schema=table_schema)
+
+        pkg = helpers.call_action("package_show", id=resource["package_id"])
+        assert pkg[const.PKG_SCHEMA_FIELD]
+
+        helpers.call_action('vsg_apply',
+                            id=resource["id"],
+                            apply_for=const.APPLY_FOR_RESOURCE,
+                            schema=table_schema)
+
+        resource = helpers.call_action("resource_show", id=resource["id"])
+        pkg = helpers.call_action("package_show", id=resource["package_id"])
+
+        assert not pkg[const.PKG_SCHEMA_FIELD]
+        assert resource[const.RES_SCHEMA_FIELD]
+
+
+@pytest.mark.usefixtures("clean_db", "with_plugins")
+class TestActionUnapply(object):
+
+    def test_unapply(self, table_schema):
+        resource = factories.Resource(datastore_active=True)
+
+        helpers.call_action('vsg_generate', id=resource['id'])
+        helpers.call_action('vsg_hook',
+                            id=resource["id"],
+                            status=const.TASK_STATE_FINISHED,
+                            error={},
+                            schema=table_schema)
+        helpers.call_action('vsg_apply',
+                            id=resource["id"],
+                            apply_for=const.APPLY_FOR_RESOURCE,
+                            schema=table_schema)
+
+        resource = helpers.call_action("resource_show", id=resource["id"])
+        assert resource[const.RES_SCHEMA_FIELD]
+
+        helpers.call_action('vsg_unapply', id=resource["id"])
+
+        resource = helpers.call_action("resource_show", id=resource["id"])
+        assert not resource[const.RES_SCHEMA_FIELD]
+
+    def test_unapply_not_applied(self, table_schema):
+        resource = factories.Resource(datastore_active=True)
+
+        helpers.call_action('vsg_generate', id=resource['id'])
+        helpers.call_action('vsg_hook',
+                            id=resource["id"],
+                            status=const.TASK_STATE_FINISHED,
+                            error={},
+                            schema=table_schema)
+
+        with pytest.raises(logic.ValidationError):
+            helpers.call_action('vsg_unapply', id=resource["id"])
+
+
+@pytest.mark.usefixtures("clean_db", "with_plugins")
+class TestActionHook(object):
+
+    def test_success(self, table_schema):
+        resource = factories.Resource(datastore_active=True)
+        result = helpers.call_action('vsg_generate', id=resource['id'])
+
+        assert result["state"] == const.TASK_STATE_PENDING
+
+        result = helpers.call_action('vsg_hook',
+                                     id=resource["id"],
+                                     status=const.TASK_STATE_FINISHED,
+                                     error={},
+                                     schema=table_schema)
+
+        assert result["entity_id"] == resource["id"]
+        assert result["state"] == const.TASK_STATE_FINISHED
+        assert result['value']['schema']
+
+    def test_not_started(self, table_schema):
+        resource = factories.Resource(datastore_active=True)
+        err_msg = u"The schema generation procecss isn't started yet."
+
+        with pytest.raises(logic.ValidationError, match=err_msg):
+            helpers.call_action('vsg_hook',
+                                id=resource["id"],
+                                status=const.TASK_STATE_FINISHED,
+                                error={},
+                                schema=table_schema)
+
+    def test_wrong_state(self, table_schema):
+        resource = factories.Resource(datastore_active=True)
+        helpers.call_action('vsg_generate', id=resource['id'])
+
+        with pytest.raises(logic.ValidationError):
+            helpers.call_action('vsg_hook',
+                                id=resource["id"],
+                                status="active",
+                                error={},
+                                schema=table_schema)
