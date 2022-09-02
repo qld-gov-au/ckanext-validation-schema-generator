@@ -108,4 +108,4 @@ def _update_task(input, errors, schema):
         'schema': schema or ''
     }
 
-    tk.get_action('vsg_hook')(context, data_dict)
+    tk.get_action('vsg_update')(context, data_dict)

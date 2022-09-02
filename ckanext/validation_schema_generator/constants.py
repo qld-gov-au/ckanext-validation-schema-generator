@@ -1,3 +1,5 @@
+from ckan.common import config
+
 TASK_TYPE = u"generate"
 TASK_KEY = u"validation_schema_generator"
 TASK_STATE_PENDING = u"Pending"
@@ -21,8 +23,10 @@ APPLY_FOR_DATASET = APPLY_FOR_OPTIONS[0]
 APPLY_FOR_RESOURCE = APPLY_FOR_OPTIONS[1]
 APPLY_FOR_FIELD = u"apply_for"
 
-RES_SCHEMA_FIELD = u"schema"
-PKG_SCHEMA_FIELD = u"default_data_schema"
+RES_SCHEMA_FIELD = config.get(
+    u"ckanext.validation_schema_generator.resource_schema_field_name", u"schema")
+PKG_SCHEMA_FIELD = config.get(
+    u"ckanext.validation_schema_generator.package_schema_field_name", u"default_data_schema")
 
 EMPTY_SCHEMA = u""
 UNAPPLIED = u""

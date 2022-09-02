@@ -1,16 +1,12 @@
-[![Tests](https://github.com//ckanext-validation-schema-generator/workflows/Tests/badge.svg?branch=main)](https://github.com//ckanext-validation-schema-generator/actions)
-
 # ckanext-validation-schema-generator
 
-**TODO:** Put a description of your extension here:  What does it do? What features does it have? Consider including some screenshots or embedding a video!
+This extension helps to generate table schema for a resource based on its content. Support tabular data.
+You must define a field for datasets and resources to store a table schema data. Check config options below.
 
 
 ## Requirements
 
-**TODO:** For example, you might want to mention here which versions of CKAN this
-extension works with.
-
-If your extension works across different versions you can add the following table:
+This extension has been written to work with python 2 and CKAN 2.9.5. Relies on datastore.
 
 Compatibility with core CKAN versions:
 
@@ -19,7 +15,7 @@ Compatibility with core CKAN versions:
 | 2.6 and earlier | not tested    |
 | 2.7             | not tested    |
 | 2.8             | not tested    |
-| 2.9             | not tested    |
+| 2.9.5+           | yes          |
 
 Suggested values:
 
@@ -59,13 +55,26 @@ To install ckanext-validation-schema-generator:
 
 ## Config settings
 
-None at present
+    # The maximum time for the schema generation before it is aborted.
+    # Give an amount in seconds. Default is 60 minutes
+    # (optional, default: 3600).
+    ckanext.validation_schema_generator.job_timeout = 3600
 
-**TODO:** Document any optional config settings here. For example:
+    # If the resource is remote or private, we could pass an API key inside headers
+    # This option defines should we pass API key or not
+    # (optional, default: True).
+    ckanext.validation_schema_generator.pass_api_key = True
 
-	# The minimum number of hours to wait before re-checking a resource
-	# (optional, default: 24).
-	ckanext.validation_schema_generator.some_setting = some_default_value
+    # API key that is going to be passed for `Authorization`
+    ckanext.validation_schema_generator.api_key =
+
+    # Field name for dataset schema field
+    # (optional, default: schema)
+    ckanext.validation_schema_generator.resource_schema_field_name = schema
+
+    # Field name for dataset schema field
+    # (optionak, default: schema)
+    ckanext.validation_schema_generator.package_schema_field_name = default_data_schema
 
 
 ## Developer installation
@@ -81,42 +90,91 @@ do:
 
 ## Tests
 
-To run the tests, do:
+There are few tests for the extension, so you could run it with next command. Be sure, that you've installed the dev-requirements from CKAN.
 
     pytest --ckan-ini=test.ini
 
 
-## Releasing a new version of ckanext-validation-schema-generator
+## API endpoints
 
-If ckanext-validation-schema-generator should be available on PyPI you can follow these steps to publish a new version:
+The extension has next endpoints to manipulate the schema generation process.
 
-1. Update the version number in the `setup.py` file. See [PEP 440](http://legacy.python.org/dev/peps/pep-0440/#public-version-identifiers) for how to choose version numbers.
+1. `vsg_generate` - starts the schema generation process by creating the appropriate task, queues a background job to be executed by `ckan jobs worker`.
+    **Params**:
+    - `id` _(required)_ - ID of the resource. Resource must be stored inside the datastore.
 
-2. Make sure you have the latest version of necessary packages:
+    **Returns**
+    ```
+    {
+      "help": ".../api/3/action/help_show?name=vsg_generate",
+      "success": true,
+      "result": {
+        "entity_id": "<RESOURCE_ID>",
+        "task_type": "generate",
+        "last_updated": "2022-09-02 14:21:14.543511",
+        "entity_type": "resource",
+        "value": {
+          "job_id": "<JOB_ID>"
+        },
+        "state": "Pending",
+        "key": "validation_schema_generator",
+        "error": "{}",
+        "id": "<TASK_ID>"
+      }
+    }
 
-    pip install --upgrade setuptools wheel twine
+2. `vsg_status` - returns a status of schema generation for a specific resource.
+    **Params**:
+    - `id` _(required)_ - ID of the resource
 
-3. Create a source and binary distributions of the new version:
+    **Returns**:
+    ```
+    {
+      "help": ".../api/3/action/help_show?name=vsg_status",
+      "success": true,
+      "result": {
+        "entity_id": "<RESOURCE_ID>",
+        "task_type": "generate",
+        "last_updated": "2022-09-02T14:21:18.289917",
+        "entity_type": "resource",
+        "value": {
+          "job_id": "<JOB_ID>",
+          "schema": {
+            "fields": [
+              {
+                "type": "string",
+                "name": "Name",
+                "format": "default"
+              }
+              ...
+            ]
+        },
+        "state": "Finished",
+        "key": "validation_schema_generator",
+        "error": {},
+        "id": "<TASK_ID>"
+      }
+    }
 
-       python setup.py sdist bdist_wheel && twine check dist/*
+3. `vsg_update` - updates a schema generation task data. The background job uses this action to update task after the schema is generated. Could be used for a testing purposes.
+    **Params**:
+    - `id` _(required)_ - ID of the resource. The generation process must be in progress, otherwise returns a validation error.
+    - `error` _(required)_ - A dict of errors, e.g. `{'format': 'couldn't generate a schema for XXX format'}`.
+    - `status` _(required)_- status of a task, must be one of `["Pending", "Finished", "Failed"]`
+    - `schema` _(optional)_ - a table schema, [read more about it](https://specs.frictionlessdata.io//table-schema/)
 
-   Fix any errors you get.
+    **Returns**
+    Updated task data, same as `vsg_status`
 
-4. Upload the source distribution to PyPI:
+4. `vsg_apply` - Apply a generated scheme or a new one. The scheme can be applied only if the generation process is successfully completed.
+    **params**:
+    - `id` (required) - ID of the resource
+    - `apply_for` _(required)_- apply for entity, must be one of `["dataset", "resource"]`
+    - `schema` _(optional)_ - a table schema. If not provided, the generated one will be used.
 
-       twine upload dist/*
-
-5. Commit any outstanding changes:
-
-       git commit -a
-       git push
-
-6. Tag the new release of the project on GitHub with the version number from
-   the `setup.py` file. For example if the version number in `setup.py` is
-   0.0.1 then do:
-
-       git tag 0.0.1
-       git push --tags
+5. `vsg_unapply` - Unapply the schema. Automatically clears the dataset/resource schema if it was using the generated schema.
+    **params**:
+    - `id` (required) - ID of the resource
 
 ## License
 

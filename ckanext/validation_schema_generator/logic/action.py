@@ -15,7 +15,7 @@ def _get_actions():
     return {
         'vsg_generate': vsg_generate,
         'vsg_status': vsg_status,
-        'vsg_hook': vsg_hook,
+        'vsg_update': vsg_update,
         'vsg_apply': vsg_apply,
         'vsg_unapply': vsg_unapply
     }
@@ -76,7 +76,7 @@ def vsg_status(context, data_dict):
 
 
 @l.validate(vsg_schema.vsg_hook_schema)
-def vsg_hook(context, data_dict):
+def vsg_update(context, data_dict):
     """Hook to update vsg task from job"""
     id, error, status = l.get_or_bust(data_dict, ['id', 'error', 'status'])
 

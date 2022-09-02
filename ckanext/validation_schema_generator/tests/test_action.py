@@ -74,7 +74,7 @@ class TestActionApply(object):
         resource = factories.Resource(datastore_active=True)
         helpers.call_action('vsg_generate', id=resource['id'])
 
-        helpers.call_action('vsg_hook',
+        helpers.call_action('vsg_update',
                             id=resource["id"],
                             status=const.TASK_STATE_FINISHED,
                             error={},
@@ -89,7 +89,7 @@ class TestActionApply(object):
     def test_apply_for_resource(self, table_schema, sysadmin):
         resource = factories.Resource(datastore_active=True)
         helpers.call_action('vsg_generate', id=resource['id'])
-        helpers.call_action('vsg_hook',
+        helpers.call_action('vsg_update',
                             id=resource["id"],
                             status=const.TASK_STATE_FINISHED,
                             error={},
@@ -105,7 +105,7 @@ class TestActionApply(object):
     def test_apply_for_package(self, table_schema):
         resource = factories.Resource(datastore_active=True)
         helpers.call_action('vsg_generate', id=resource['id'])
-        helpers.call_action('vsg_hook',
+        helpers.call_action('vsg_update',
                             id=resource["id"],
                             status=const.TASK_STATE_FINISHED,
                             error={},
@@ -121,7 +121,7 @@ class TestActionApply(object):
     def test_apply_resource_must_unapply_pkg_schema(self, table_schema):
         resource = factories.Resource(datastore_active=True)
         helpers.call_action('vsg_generate', id=resource['id'])
-        helpers.call_action('vsg_hook',
+        helpers.call_action('vsg_update',
                             id=resource["id"],
                             status=const.TASK_STATE_FINISHED,
                             error={},
@@ -147,7 +147,7 @@ class TestActionApply(object):
         resource = factories.Resource(datastore_active=True)
 
         helpers.call_action('vsg_generate', id=resource['id'])
-        helpers.call_action('vsg_hook',
+        helpers.call_action('vsg_update',
                             id=resource["id"],
                             status=const.TASK_STATE_FINISHED,
                             error={},
@@ -173,7 +173,7 @@ class TestActionApply(object):
         resource = factories.Resource(datastore_active=True)
 
         helpers.call_action('vsg_generate', id=resource['id'])
-        helpers.call_action('vsg_hook',
+        helpers.call_action('vsg_update',
                             id=resource["id"],
                             status=const.TASK_STATE_FINISHED,
                             error={},
@@ -205,7 +205,7 @@ class TestActionUnapply(object):
         resource = factories.Resource(datastore_active=True)
 
         helpers.call_action('vsg_generate', id=resource['id'])
-        helpers.call_action('vsg_hook',
+        helpers.call_action('vsg_update',
                             id=resource["id"],
                             status=const.TASK_STATE_FINISHED,
                             error={},
@@ -227,7 +227,7 @@ class TestActionUnapply(object):
         resource = factories.Resource(datastore_active=True)
 
         helpers.call_action('vsg_generate', id=resource['id'])
-        helpers.call_action('vsg_hook',
+        helpers.call_action('vsg_update',
                             id=resource["id"],
                             status=const.TASK_STATE_FINISHED,
                             error={},
@@ -246,7 +246,7 @@ class TestActionHook(object):
 
         assert result["state"] == const.TASK_STATE_PENDING
 
-        result = helpers.call_action('vsg_hook',
+        result = helpers.call_action('vsg_update',
                                      id=resource["id"],
                                      status=const.TASK_STATE_FINISHED,
                                      error={},
@@ -261,7 +261,7 @@ class TestActionHook(object):
         err_msg = u"The schema generation procecss isn't started yet."
 
         with pytest.raises(logic.ValidationError, match=err_msg):
-            helpers.call_action('vsg_hook',
+            helpers.call_action('vsg_update',
                                 id=resource["id"],
                                 status=const.TASK_STATE_FINISHED,
                                 error={},
@@ -272,7 +272,7 @@ class TestActionHook(object):
         helpers.call_action('vsg_generate', id=resource['id'])
 
         with pytest.raises(logic.ValidationError):
-            helpers.call_action('vsg_hook',
+            helpers.call_action('vsg_update',
                                 id=resource["id"],
                                 status="active",
                                 error={},
