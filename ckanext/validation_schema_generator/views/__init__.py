@@ -1,17 +1,21 @@
 import json
+from ckan.logic.action.get import ValidationError
 
 from flask import Blueprint
 from flask.views import MethodView
-from tableschema import validate as ts_validate
-from tableschema import ValidationError as TsValidationError
 
+import ckan.lib.helpers as h
 import ckan.plugins.toolkit as tk
 
-from ckanext.validation_schema_generator.utils import (
-    prepare_task_for_serialization, get_current_time, update_task)
+from ckanext.validation_schema_generator.utils import update_task
 from ckanext.validation_schema_generator.constants import (
-    APPLY_FOR_OPTIONS, APPLY_FOR_DATASET, APPLY_FOR_RESOURCE, RES_SCHEMA_FIELD,
-    PKG_SCHEMA_FIELD, APPLY_FOR_FIELD, EMPTY_SCHEMA, UNAPPLIED)
+    APPLY_FOR_DATASET,
+    APPLY_FOR_RESOURCE,
+    RES_SCHEMA_FIELD,
+    PKG_SCHEMA_FIELD,
+    APPLY_FOR_FIELD,
+    UNAPPLIED,
+)
 
 vsg = Blueprint("validation_schema_generator", __name__)
 
@@ -19,9 +23,9 @@ vsg = Blueprint("validation_schema_generator", __name__)
 class VSGIndexView(MethodView):
 
     def _redirect(self, dataset_id, resource_id):
-        return tk.h.redirect_to('validation_schema_generator.index',
-                                dataset_id=dataset_id,
-                                resource_id=resource_id)
+        return h.redirect_to('validation_schema_generator.index',
+                             dataset_id=dataset_id,
+                             resource_id=resource_id)
 
     def get(self, dataset_id, resource_id):
         try:
@@ -46,6 +50,9 @@ class VSGIndexView(MethodView):
             self._clean_apply_for_if_missing(task)
             self._clean_if_applied_another_schema(task)
 
+        if task.get('value') and task['value'].get('schema'):
+            task['value']['schema'] = self._format_schema(task['value']['schema'])
+
         return tk.render('vsg/index.html',
                          extra_vars={
                              "pkg_dict": self.pkg_dict,
@@ -57,8 +64,8 @@ class VSGIndexView(MethodView):
         """If schema has been manually removed from package
         or resource -> reset apply_for, because it's definitely not applied
         """
-        apply_for = task['value'].get(APPLY_FOR_FIELD)
 
+        apply_for = task['value'].get(APPLY_FOR_FIELD)
         if not apply_for:
             return
 
@@ -74,7 +81,7 @@ class VSGIndexView(MethodView):
     def _clean_if_applied_another_schema(self, task):
         """If another generated from resource schema is applied, clear this one"""
         apply_for = task['value'].get(APPLY_FOR_FIELD)
-        schema = json.loads(task['value'].get('schema') or '{}')
+        schema = task['value'].get('schema')
 
         if not apply_for or not schema:
             return
@@ -90,6 +97,9 @@ class VSGIndexView(MethodView):
 
         update_task({}, task.copy())
 
+    def _format_schema(self, schema):
+        return json.dumps(schema, indent=4)
+
     def post(self, dataset_id, resource_id):
         self.dataset_id = dataset_id
         self.resource_id = resource_id
@@ -100,7 +110,7 @@ class VSGIndexView(MethodView):
             try:
                 tk.get_action(u'vsg_generate')({}, {"id": resource_id})
             except tk.ValidationError as e:
-                tk.h.flash_error(e)
+                h.flash_error(str(e))
         elif 'apply' in self.data:
             self.apply_schema()
 
@@ -108,90 +118,35 @@ class VSGIndexView(MethodView):
 
     def apply_schema(self):
         """Apply a generated schema for resource or dataset"""
-        task = tk.get_action(u'vsg_status')({}, {u'id': self.resource_id})
-
-        if not self._is_schema_valid():
-            return
 
         apply_for = self.data[APPLY_FOR_FIELD]
 
         if not apply_for:
-            applied_for = task['value'].get(APPLY_FOR_FIELD)
-            task['value'][APPLY_FOR_FIELD] = ''
-
-            if not applied_for:
-                tk.h.flash_success(u"The schema is not applied yet")
+            try:
+                tk.get_action(u'vsg_unapply')({}, {"id": self.resource_id})
+            except ValidationError as e:
+                return h.flash_error(_fetch_error(e))
             else:
-                if applied_for == APPLY_FOR_DATASET:
-                    self._unapply_package_schema()
-                else:
-                    self._unapply_resource_schema()
-                tk.h.flash_success(u"The schema has been unapplied")
-        else:
-            if apply_for not in APPLY_FOR_OPTIONS:
-                tk.h.flash_error(
-                    u"Apply for {} not implemented".format(apply_for))
-            else:
-                if self.schema != task['value']['schema']:
-                    task['last_updated'] = get_current_time()
-
-                task['value'][APPLY_FOR_FIELD] = apply_for
-                task['value']['schema'] = self.schema
-
-                if apply_for == APPLY_FOR_DATASET:
-                    self._apply_schema_for_pkg()
-                else:
-                    self._apply_res_schema()
-
-        update_task({}, task)
-
-    def _is_schema_valid(self):
-        """Check if the schema is valid as the user could have changed
-        it after generation"""
-        valid = False
+                return h.flash_success(tk._(u"The schema has been unapplied"))
 
         try:
-            ts_validate(json.loads(self.schema))
-        except ValueError as e:
-            tk.h.flash_error(e.message)
-        except TsValidationError as e:
-            for error in e.errors:
-                tk.h.flash_error(error.message)
+            tk.get_action(u'vsg_apply')({}, {
+                "id": self.resource_id,
+                "schema": self.schema,
+                "apply_for": apply_for
+            })
+        except ValidationError as e:
+            return h.flash_error(_fetch_error(e))
         else:
-            valid = True
+            return h.flash_error(
+                tk._(u"The schema has been applied for {}").format(apply_for))
 
-        return valid
 
-    def _unapply_resource_schema(self):
-        """Unapply resource schema actually means applying an empty one"""
-        self.schema = EMPTY_SCHEMA
-        self._apply_res_schema()
-
-    def _apply_res_schema(self):
-        """Apply the generated schema for resource and unapply for package"""
-        res = tk.get_action(u'resource_show')({}, {u'id': self.resource_id})
-        res[RES_SCHEMA_FIELD] = self.schema
-
-        tk.get_action(u'resource_update')({}, res)
-
-        self._unapply_package_schema()
-
-    def _unapply_package_schema(self):
-        """Unapply package schema actually means applying an empty one"""
-        self.schema = EMPTY_SCHEMA
-        self._apply_schema_for_pkg()
-
-    def _apply_schema_for_pkg(self):
-        """Apply the generated schema for package and unapply for resource"""
-        pkg = tk.get_action(u'package_show')({}, {u'id': self.dataset_id})
-        pkg[PKG_SCHEMA_FIELD] = self.schema
-
-        if self.schema:
-            for resource in pkg.get('resources', []):
-                if resource['id'] == self.resource_id:
-                    resource[RES_SCHEMA_FIELD] = ''
-
-        tk.get_action(u'package_update')({}, pkg)
+def _fetch_error(e):
+    for err in e.error_dict.values():
+        if isinstance(err, list):
+            return err[0]
+        return err
 
 
 vsg.add_url_rule(

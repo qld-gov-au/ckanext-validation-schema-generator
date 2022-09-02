@@ -10,6 +10,7 @@ from ckan.exceptions import CkanVersionException
 
 from ckanext.validation_schema_generator.logic.action import _get_actions
 from ckanext.validation_schema_generator.logic.auth import _get_auth_functions
+from ckanext.validation_schema_generator.logic.validators import _get_validators
 from ckanext.validation_schema_generator.helpers import _get_helpers
 
 try:
@@ -28,6 +29,7 @@ class ValidationSchemaGeneratorPlugin(VSGMixinPlugin, p.SingletonPlugin):
     p.implements(p.IActions)
     p.implements(p.IAuthFunctions)
     p.implements(p.ITemplateHelpers)
+    p.implements(p.IValidators)
 
     # IConfigurer
 
@@ -49,3 +51,8 @@ class ValidationSchemaGeneratorPlugin(VSGMixinPlugin, p.SingletonPlugin):
 
     def get_helpers(self):
         return _get_helpers()
+
+    # IValidators
+
+    def get_validators(self):
+        return _get_validators()

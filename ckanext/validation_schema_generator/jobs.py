@@ -1,5 +1,3 @@
-import json
-
 import requests
 
 from tableschema import infer as ts_infer, TableSchemaException
@@ -9,13 +7,13 @@ import ckan.model as model
 import ckan.plugins.toolkit as tk
 import ckan.lib.uploader as uploader
 
-from ckanext.validation_schema_generator.utils import (
-    prepare_task_for_serialization,
-    get_current_time
-)
 from ckanext.validation_schema_generator.constants import (
-    CF_PASS_AUTH, CF_PASS_AUTH_DF, CF_API_KEY, TASK_STATE_FINISHED,
-    TASK_STATE_ERROR)
+    CF_PASS_AUTH,
+    CF_PASS_AUTH_DF,
+    CF_API_KEY,
+    TASK_STATE_FINISHED,
+    TASK_STATE_ERROR,
+)
 
 
 def generate_schema_from_resource(input):
@@ -47,7 +45,9 @@ def generate_schema_from_resource(input):
 
     try:
         if resource.get(u'url_type') == u'upload':
-            schema = ts_infer(source=source, format=resource['format'].lower(), **options)
+            schema = ts_infer(source=source,
+                              format=resource['format'].lower(),
+                              **options)
         else:
             schema = ts_infer(source=source, **options)
     except TableSchemaException as e:
@@ -105,7 +105,7 @@ def _update_task(input, errors, schema):
         'id': input[u'resource_id'],
         'status': TASK_STATE_ERROR if errors else TASK_STATE_FINISHED,
         'error': errors,
-        'schema': json.dumps(schema, indent=4) if schema else ''
+        'schema': schema or ''
     }
 
     tk.get_action('vsg_hook')(context, data_dict)

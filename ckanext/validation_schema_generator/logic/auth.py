@@ -3,7 +3,9 @@ import ckan.authz as authz
 
 
 def _get_auth_functions():
-    return {"vsg_generate": vsg_generate, "vsg_status": vsg_status}
+    return {
+        "vsg_generate": vsg_generate,
+    }
 
 
 def vsg_generate(context, data_dict):
@@ -12,13 +14,13 @@ def vsg_generate(context, data_dict):
     :param id: the id of the resource to generate schema for
     :type id: string
     """
-    return authz.is_authorized("resource_update", context, data_dict)
+    authorized = authz.is_authorized('resource_update', context,
+                                     data_dict).get('success')
 
+    if authorized:
+        return {'success': True}
 
-def vsg_status(context, data_dict):
-    """Check if user is allowed to check VSG status
-
-    :param id: the id of the resource to check vsg status
-    :type id: string
-    """
-    return authz.is_authorized("resource_update", context, data_dict)
+    msg = tk._('You are not authorized to generate schema for resource {}').format(
+        data_dict['id']
+    )
+    return {'success': False, 'msg': msg}
