@@ -3,7 +3,7 @@ from ckan.common import config
 TASK_TYPE = u"generate"
 TASK_KEY = u"validation_schema_generator"
 TASK_STATE_PENDING = u"Pending"
-TASK_STATE_FINISHED = u"Finished"
+TASK_STATE_FINISHED = u"Complete"
 TASK_STATE_NOT_GENERATED = u"Not generated"
 TASK_STATE_ERROR = u"Failed"
 VALID_STATES = [

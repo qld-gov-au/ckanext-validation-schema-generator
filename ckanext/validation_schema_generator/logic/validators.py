@@ -59,8 +59,6 @@ def vsg_validate_schema(value, context):
 def vsg_generation_started(key, data, errors, context):
     """Checks if the vsg generation is started. Otherwise, there's no sense to update
     it somehow"""
-    model = context['model']
-    session = context['session']
 
     result = tk.get_action('vsg_status')(context, {"id": data[key]})
 

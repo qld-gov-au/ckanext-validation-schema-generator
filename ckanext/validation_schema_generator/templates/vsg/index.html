@@ -38,35 +38,23 @@
                 <col>
             </colgroup>
             <tr>
-                <th>
-                    {{ _('Status') }}
-                </th>
-                <td>
-                    {{ task.state or _('Not generated') }}
-                </td>
+                <th>{{ _('Status') }}</th>
+                <td>{{ task.state or _('Not generated') }}</td>
             </tr>
             <tr>
-                <th>
-                    {{ _('Last updated') }}
-                </th>
+                <th>{{ _('Last updated') }}</th>
                 {% if task.last_updated %}
                     <td>
-                        <span class="date" title="{{ h.render_datetime(task.last_updated, with_hours=True) }}">
-                            {{ h.time_ago_from_timestamp(task.last_updated) }}
-                        </span>
+                        <span class="date" title="{{ h.render_datetime(task.last_updated, with_hours=True) }}">{{ h.time_ago_from_timestamp(task.last_updated) }}</span>
                     </td>
                 {% else %}
-                    <td>
-                        {{ _('Never') }}
-                    </td>
+                    <td>{{ _('Never') }}</td>
                 {% endif %}
             </tr>
 
             {% if task.value.schema %}
                 <tr>
-                    <th>
-                        {{ _('JSON data schema') }}
-                    </th>
+                    <th>{{ _('JSON data schema') }}</th>
 
                     <td class="with-textarea">
                         {{ form.textarea('schema', id='field-schema', value=task.value.schema, error=error) }}
@@ -83,17 +71,15 @@
                     {{ _('Leaving blank will NOT change any pre-existing validation for this dataset or resource.') }}
                 </p>
                 <p>
-                    {{ _('Once applied as the `Dataset default`, all dataset resources, when edited or added, will be validated against this data schema.') }}
+                    {{ _('Once applied as the "Dataset default", all dataset resources, when edited or added, will be validated against this data schema.') }}
                 </p>
                 <p>
-                    {{ _('Once applied to only this `Resource`, saved edits will be validated against this data schema unless otherwise overwritten (e.g. Dataset default schema') }}
+                    {{ _('Once applied to only this "Resource", saved edits will be validated against this data schema unless otherwise overwritten (e.g. Dataset default set).') }}
                 </p>
             </div>
             {% endcall %}
 
-            <button class="btn btn-primary btn-apply" name="apply" type="submit">
-                {{ _('Apply') }}
-            </button>
+            <button class="btn btn-primary btn-apply" name="apply" type="submit">{{ _('Apply') }}</button>
         {% endif %}
     </form>
 {% endblock %}
