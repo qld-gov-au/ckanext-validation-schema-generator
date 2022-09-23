@@ -1,5 +1,5 @@
 import json
-from ckan.logic.action.get import ValidationError
+from ckan.plugins.toolkit import ValidationError
 
 from flask import Blueprint
 from flask.views import MethodView

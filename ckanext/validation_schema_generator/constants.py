@@ -1,4 +1,4 @@
-from ckan.common import config
+import ckan.plugins.toolkit as tk
 
 TASK_TYPE = u"generate"
 TASK_KEY = u"validation_schema_generator"
@@ -23,9 +23,9 @@ APPLY_FOR_DATASET = APPLY_FOR_OPTIONS[0]
 APPLY_FOR_RESOURCE = APPLY_FOR_OPTIONS[1]
 APPLY_FOR_FIELD = u"apply_for"
 
-RES_SCHEMA_FIELD = config.get(
+RES_SCHEMA_FIELD = tk.config.get(
     u"ckanext.validation_schema_generator.resource_schema_field_name", u"schema")
-PKG_SCHEMA_FIELD = config.get(
+PKG_SCHEMA_FIELD = tk.config.get(
     u"ckanext.validation_schema_generator.package_schema_field_name", u"default_data_schema")
 
 EMPTY_SCHEMA = u""
