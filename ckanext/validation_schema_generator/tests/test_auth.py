@@ -1,7 +1,7 @@
 import pytest
 import mock
 
-import ckan.logic as logic
+import ckan.plugins.toolkit as tk
 import ckan.model as model
 from ckan.tests import helpers, factories
 
@@ -13,7 +13,7 @@ class TestAuth(object):
         resource = factories.Resource()
         context = {"user": "", "model": model}
 
-        with pytest.raises(logic.NotAuthorized):
+        with pytest.raises(tk.NotAuthorized):
             helpers.call_auth("vsg_generate", context, id=resource["id"])
 
     # TODO: Problem with auth for regualar user
@@ -22,7 +22,7 @@ class TestAuth(object):
     #     user = factories.User()
     #     context = {"user": user["name"], "model": model}
 
-    #     with pytest.raises(logic.NotAuthorized):
+    #     with pytest.raises(tk.NotAuthorized):
     #         helpers.call_auth("vsg_generate", context, id=resource["id"])
 
     def test_sysadmin(self):

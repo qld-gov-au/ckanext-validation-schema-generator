@@ -3,7 +3,7 @@
 import ckan.plugins as p
 
 
-class VSGMixinPlugin(p.SingletonPlugin):
+class MixinPlugin(p.SingletonPlugin):
     p.implements(p.IRoutes, inherit=True)
 
     def before_map(self, map):

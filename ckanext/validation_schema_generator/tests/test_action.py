@@ -2,7 +2,7 @@ import json
 
 import pytest
 
-import ckan.logic as logic
+import ckan.plugins.toolkit as tk
 from ckan.tests import helpers, factories
 
 import ckanext.validation_schema_generator.constants as const
@@ -15,7 +15,7 @@ class TestActionGenerate(object):
         resource = factories.Resource()
         err_msg = u"Schema couldn't be generated for this resource"
 
-        with pytest.raises(logic.ValidationError, match=err_msg):
+        with pytest.raises(tk.ValidationError, match=err_msg):
             helpers.call_action('vsg_generate', id=resource['id'])
 
     def test_in_datastore(self):
@@ -30,11 +30,11 @@ class TestActionGenerate(object):
         assert result["key"] == const.TASK_KEY
 
     def test_missing_resource(self):
-        with pytest.raises(logic.ValidationError, match='Resource not found'):
+        with pytest.raises(tk.ValidationError, match='Resource not found'):
             helpers.call_action('vsg_generate', id='missing')
 
     def test_res_id_not_provided(self):
-        with pytest.raises(logic.ValidationError, match='Missing value'):
+        with pytest.raises(tk.ValidationError, match='Missing value'):
             helpers.call_action('vsg_generate')
 
 
@@ -63,7 +63,7 @@ class TestActionStatus(object):
         assert not result['last_updated']
 
     def test_res_id_not_provided(self):
-        with pytest.raises(logic.ValidationError, match='Missing value'):
+        with pytest.raises(tk.ValidationError, match='Missing value'):
             helpers.call_action('vsg_status')
 
 
@@ -80,7 +80,7 @@ class TestActionApply(object):
                             error={},
                             schema=table_schema)
 
-        with pytest.raises(logic.ValidationError):
+        with pytest.raises(tk.ValidationError):
             helpers.call_action('vsg_apply',
                                 id=resource["id"],
                                 apply_for="organization",
@@ -233,7 +233,7 @@ class TestActionUnapply(object):
                             error={},
                             schema=table_schema)
 
-        with pytest.raises(logic.ValidationError):
+        with pytest.raises(tk.ValidationError):
             helpers.call_action('vsg_unapply', id=resource["id"])
 
 
@@ -260,7 +260,7 @@ class TestActionHook(object):
         resource = factories.Resource(datastore_active=True)
         err_msg = u"The schema generation procecss isn't started yet."
 
-        with pytest.raises(logic.ValidationError, match=err_msg):
+        with pytest.raises(tk.ValidationError, match=err_msg):
             helpers.call_action('vsg_update',
                                 id=resource["id"],
                                 status=const.TASK_STATE_FINISHED,
@@ -271,7 +271,7 @@ class TestActionHook(object):
         resource = factories.Resource(datastore_active=True)
         helpers.call_action('vsg_generate', id=resource['id'])
 
-        with pytest.raises(logic.ValidationError):
+        with pytest.raises(tk.ValidationError):
             helpers.call_action('vsg_update',
                                 id=resource["id"],
                                 status="active",

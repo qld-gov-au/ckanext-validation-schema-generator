@@ -1,14 +1,11 @@
 import json
 
 import ckan.plugins.toolkit as tk
-import ckan.logic as l
-from ckan.common import config, asint
+from ckan.logic import validate
 from ckan.lib.jobs import enqueue as enqueue_job
 
-import ckanext.validation_schema_generator.jobs as jobs
+from ckanext.validation_schema_generator import jobs, utils as vsg_utils, constants as const
 import ckanext.validation_schema_generator.logic.schema as vsg_schema
-import ckanext.validation_schema_generator.utils as vsg_utils
-import ckanext.validation_schema_generator.constants as const
 
 
 def _get_actions():
@@ -21,14 +18,14 @@ def _get_actions():
     }
 
 
-@l.validate(vsg_schema.vsg_generate_schema)
+@validate(vsg_schema.vsg_generate_schema)
 def vsg_generate(context, data_dict):
     """Generate a schema for a dataset
 
     :param id: resource ID
     :type id: string
     """
-    l.check_access('vsg_generate', context, data_dict)
+    tk.check_access('vsg_generate', context, data_dict)
 
     task = vsg_utils.update_task(
         context,
@@ -37,7 +34,7 @@ def vsg_generate(context, data_dict):
 
     data = {"resource_id": data_dict["id"], "task_id": task["id"]}
 
-    timeout = asint(config.get(const.CF_JOB_TIMEOUT, const.CF_JOB_TIMEOUT_DF))
+    timeout = tk.asint(tk.config.get(const.CF_JOB_TIMEOUT, const.CF_JOB_TIMEOUT_DF))
     job = enqueue_job(jobs.generate_schema_from_resource, [data],
                       rq_kwargs={"timeout": timeout})
 
@@ -47,14 +44,14 @@ def vsg_generate(context, data_dict):
     return vsg_utils.update_task(context, task)
 
 
-@l.validate(vsg_schema.vsg_default_schema)
+@validate(vsg_schema.vsg_default_schema)
 def vsg_status(context, data_dict):
     """Return a status of schema generation for a specific resource
 
     :param id: resource ID
     :type id: string
     """
-    l.check_access('vsg_generate', context, data_dict)
+    tk.check_access('vsg_generate', context, data_dict)
 
     try:
         task = tk.get_action('task_status_show')(context, {
@@ -62,7 +59,7 @@ def vsg_status(context, data_dict):
             'task_type': const.TASK_TYPE,
             'key': const.TASK_KEY
         })
-    except l.NotFound:
+    except tk.ObjectNotFound:
         return {
             'state': const.TASK_STATE_NOT_GENERATED,
             'last_updated': None,
@@ -75,12 +72,12 @@ def vsg_status(context, data_dict):
     return task
 
 
-@l.validate(vsg_schema.vsg_hook_schema)
+@validate(vsg_schema.vsg_hook_schema)
 def vsg_update(context, data_dict):
     """Hook to update vsg task from job"""
-    id, error, status = l.get_or_bust(data_dict, ['id', 'error', 'status'])
+    id, error, status = tk.get_or_bust(data_dict, ['id', 'error', 'status'])
 
-    l.check_access('vsg_generate', context, {'id': id})
+    tk.check_access('vsg_generate', context, {'id': id})
     task = tk.get_action('vsg_status')(context, {'id': id})
 
     task['state'] = status
@@ -91,7 +88,7 @@ def vsg_update(context, data_dict):
     return vsg_utils.update_task(context, task)
 
 
-@l.validate(vsg_schema.vsg_apply_schema)
+@validate(vsg_schema.vsg_apply_schema)
 def vsg_apply(context, data_dict):
     """Apply a generated scheme or a new one. The scheme can be applied only
     if the generation process is successfully completed
@@ -103,7 +100,7 @@ def vsg_apply(context, data_dict):
     :param schema: if the schema is provided, it will replace the generated one (optional)
     :type schema: string
     """
-    l.check_access('vsg_generate', context, data_dict)
+    tk.check_access('vsg_generate', context, data_dict)
 
     apply_for = data_dict.get(const.APPLY_FOR_FIELD)
     schema = data_dict.get('schema')
@@ -112,9 +109,9 @@ def vsg_apply(context, data_dict):
 
     if task['state'] in (const.TASK_STATE_NOT_GENERATED,
                          const.TASK_STATE_PENDING):
-        raise l.ValidationError(tk._(u"Schema is not generated yet."))
+        raise tk.ValidationError(tk._(u"Schema is not generated yet."))
     elif task['state'] == const.TASK_STATE_ERROR:
-        raise l.ValidationError(
+        raise tk.ValidationError(
             tk._(u"Schema generation failed. Check status."))
 
     current_schema = task['value']['schema']
@@ -163,7 +160,7 @@ def _apply_pkg_schema(schema, resource_id):
     tk.get_action(u'package_update')(context, pkg)
 
 
-@l.validate(vsg_schema.vsg_default_schema)
+@validate(vsg_schema.vsg_default_schema)
 def vsg_unapply(context, data_dict):
     """Unapply the schema. Automatically clears the dataset/resource schema if
     it was using the generated schema.
@@ -171,7 +168,7 @@ def vsg_unapply(context, data_dict):
     :param id: resource ID
     :type id: string
     """
-    l.check_access('vsg_generate', context, data_dict)
+    tk.check_access('vsg_generate', context, data_dict)
 
     apply_for = data_dict.get(const.APPLY_FOR_FIELD)
 
@@ -179,14 +176,14 @@ def vsg_unapply(context, data_dict):
 
     if task['state'] in (const.TASK_STATE_NOT_GENERATED,
                          const.TASK_STATE_PENDING):
-        raise l.ValidationError(u"Schema is not generated yet")
+        raise tk.ValidationError(u"Schema is not generated yet")
     elif task['state'] == const.TASK_STATE_ERROR:
-        raise l.ValidationError(u"Schema generation failed. Check status.")
+        raise tk.ValidationError(u"Schema generation failed. Check status.")
 
     applied_for = task['value'].get(const.APPLY_FOR_FIELD)
 
     if not applied_for:
-        raise l.ValidationError(u"The schema is not applied yet")
+        raise tk.ValidationError(u"The schema is not applied yet")
 
     if apply_for == const.APPLY_FOR_DATASET:
         _unapply_package_schema(data_dict['id'])

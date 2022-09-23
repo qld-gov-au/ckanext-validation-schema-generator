@@ -2,9 +2,9 @@
 
 import ckan.plugins as p
 
-from ckanext.validation_schema_generator.views import vsg
+from .views import vsg
 
-class VSGMixinPlugin(p.SingletonPlugin):
+class MixinPlugin(p.SingletonPlugin):
     p.implements(p.IBlueprint)
 
     # IBlueprint
