@@ -1,5 +1,6 @@
+# encoding: utf-8
+
 import pytest
-import mock
 
 import ckan.plugins.toolkit as tk
 import ckan.model as model
@@ -33,5 +34,5 @@ class TestAuth(object):
 
         context = {"user": user["name"], "model": model}
         helpers.call_auth("vsg_generate",
-                                     context,
-                                     id=resource["id"])
+                          context,
+                          id=resource["id"])
