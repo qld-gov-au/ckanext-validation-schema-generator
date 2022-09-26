@@ -1,7 +1,4 @@
 import pytest
-from pytest_factoryboy import register
-
-import ckan.tests.factories as factories
 
 
 @pytest.fixture
@@ -30,10 +27,3 @@ def table_schema():
         }],
         "missingValues": [""]
     }'''
-
-
-class SysadminFactory(factories.Sysadmin):
-    pass
-
-
-register(SysadminFactory, "sysadmin")

@@ -86,7 +86,7 @@ class TestActionApply(object):
                                 apply_for="organization",
                                 schema=table_schema)
 
-    def test_apply_for_resource(self, table_schema, sysadmin):
+    def test_apply_for_resource(self, table_schema):
         resource = factories.Resource(datastore_active=True)
         helpers.call_action('vsg_generate', id=resource['id'])
         helpers.call_action('vsg_update',
