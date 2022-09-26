@@ -1,4 +1,4 @@
-import json
+# encoding: utf-8
 
 import ckan.plugins.toolkit as tk
 

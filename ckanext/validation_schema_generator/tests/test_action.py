@@ -1,4 +1,4 @@
-import json
+# encoding: utf-8
 
 import pytest
 
@@ -120,32 +120,6 @@ class TestActionApply(object):
 
     def test_apply_resource_must_unapply_pkg_schema(self, table_schema):
         resource = factories.Resource(datastore_active=True)
-        helpers.call_action('vsg_generate', id=resource['id'])
-        helpers.call_action('vsg_update',
-                            id=resource["id"],
-                            status=const.TASK_STATE_FINISHED,
-                            error={},
-                            schema=table_schema)
-        helpers.call_action('vsg_apply',
-                            id=resource["id"],
-                            apply_for=const.APPLY_FOR_RESOURCE,
-                            schema=table_schema)
-
-        resource = helpers.call_action("resource_show", id=resource["id"])
-        assert resource[const.RES_SCHEMA_FIELD]
-
-        helpers.call_action('vsg_apply',
-                            id=resource["id"],
-                            apply_for=const.APPLY_FOR_DATASET,
-                            schema=table_schema)
-
-        pkg = helpers.call_action("package_show", id=resource["package_id"])
-        assert pkg[const.PKG_SCHEMA_FIELD]
-        assert not pkg['resources'][0][const.RES_SCHEMA_FIELD]
-
-    def test_apply_resource_must_unapply_pkg_schema(self, table_schema):
-        resource = factories.Resource(datastore_active=True)
-
         helpers.call_action('vsg_generate', id=resource['id'])
         helpers.call_action('vsg_update',
                             id=resource["id"],

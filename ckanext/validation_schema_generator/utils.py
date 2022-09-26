@@ -39,7 +39,6 @@ def update_task(context, data_dict):
     return task
 
 
-
 def validate_schema(schema):
     """Validate the table schema and returns an array of errors"""
     errors = []
