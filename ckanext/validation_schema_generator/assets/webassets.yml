@@ -1,14 +1,14 @@
-# validation_schema_generator-js:
-#   filter: rjsmin
-#   output: ckanext-validation_schema_generator/%(version)s-validation_schema_generator.js
-#   contents:
-#     - js/validation_schema_generator.js
-#   extra:
-#     preload:
-#       - base/main
+vsg_js:
+  filter: rjsmin
+  output: ckanext-validation_schema_generator/%(version)s-validation_schema_generator.js
+  contents:
+    - js/validation_schema_generator.js
+  extra:
+    preload:
+      - base/main
 
-# validation_schema_generator-css:
-#   filter: cssrewrite
-#   output: ckanext-validation_schema_generator/%(version)s-validation_schema_generator.css
-#   contents:
-#     - css/validation_schema_generator.css
+vsg_css:
+  filter: cssrewrite
+  output: ckanext-validation_schema_generator/%(version)s-validation_schema_generator.css
+  contents:
+    - css/validation_schema_generator.css

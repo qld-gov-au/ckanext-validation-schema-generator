@@ -1,0 +1,27 @@
+.schema-generate .alert {
+    margin-bottom: 20px;
+}
+
+.generate-schema-form .btn-generate {
+    margin-bottom: 20px;
+}
+
+.generate-schema-form .table-schema {
+    margin-bottom: 30px;
+}
+
+.generate-schema-form .with-textarea .form-group {
+    margin: 0;
+}
+
+.generate-schema-form .with-textarea .form-group.control-select {
+    margin-bottom: 20px;
+}
+
+.generate-schema-form .with-textarea .form-group textarea {
+    min-height: 300px;
+}
+
+.generate-schema-form .with-textarea .control-label {
+    display: none;
+}
