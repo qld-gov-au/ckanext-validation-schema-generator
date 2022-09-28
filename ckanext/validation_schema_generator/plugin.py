@@ -11,9 +11,9 @@ from . import helpers
 from .logic import action, auth, validators
 
 if helpers.is_ckan_29():
-    from .pylons_plugin import MixinPlugin
-else:
     from .flask_plugin import MixinPlugin
+else:
+    from .pylons_plugin import MixinPlugin
 
 
 log = logging.getLogger(__name__)
