@@ -34,7 +34,8 @@ def vsg_generate(context, data_dict):
 
     data = {"resource_id": data_dict["id"], "task_id": task["id"]}
 
-    timeout = tk.asint(tk.config.get(const.CF_JOB_TIMEOUT, const.CF_JOB_TIMEOUT_DF))
+    timeout = tk.asint(tk.config.get(
+        const.CF_JOB_TIMEOUT, const.CF_JOB_TIMEOUT_DF))
     job = enqueue_job(jobs.generate_schema_from_resource, [data],
                       rq_kwargs={"timeout": timeout})
 
@@ -83,7 +84,8 @@ def vsg_update(context, data_dict):
     task['state'] = status
     task['last_updated'] = vsg_utils.get_current_time()
     task['error'] = error
-    task['value']['schema'] = json.loads(data_dict.get("schema", const.EMPTY_SCHEMA))
+    task['value']['schema'] = json.loads(
+        data_dict.get("schema", const.EMPTY_SCHEMA))
 
     return vsg_utils.update_task(context, task)
 

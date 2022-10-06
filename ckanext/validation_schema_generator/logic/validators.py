@@ -41,7 +41,8 @@ def vsg_is_resource_supportable(key, data, errors, context):
     res = session.query(model.Resource).get(data[key])
 
     if not res.extras.get('datastore_active'):
-        errors[key].append(tk._('Schema couldn\'t be generated for this resource'))
+        errors[key].append(
+            tk._('Schema couldn\'t be generated for this resource'))
         raise tk.StopOnError()
 
 
@@ -63,5 +64,6 @@ def vsg_generation_started(key, data, errors, context):
     result = tk.get_action('vsg_status')(context, {"id": data[key]})
 
     if result['state'] == const.TASK_STATE_NOT_GENERATED:
-        errors[key].append(tk._('The schema generation procecss isn\'t started yet.'))
+        errors[key].append(
+            tk._('The schema generation procecss isn\'t started yet.'))
         raise tk.StopOnError()

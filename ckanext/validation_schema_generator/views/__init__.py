@@ -51,7 +51,8 @@ class VSGIndexView(MethodView):
             self._clean_if_applied_another_schema(task)
 
         if task.get('value') and task['value'].get('schema'):
-            task['value']['schema'] = self._format_schema(task['value']['schema'])
+            task['value']['schema'] = self._format_schema(
+                task['value']['schema'])
 
         return tk.render('vsg/index.html',
                          extra_vars={
