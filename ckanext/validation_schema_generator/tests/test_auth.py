@@ -17,14 +17,13 @@ class TestAuth(object):
         with pytest.raises(tk.NotAuthorized):
             helpers.call_auth("vsg_generate", context, id=resource["id"])
 
-    # TODO: Problem with auth for regualar user
-    # def test_regular_user_not_allowed(self):
-    #     resource = factories.Resource()
-    #     user = factories.User()
-    #     context = {"user": user["name"], "model": model}
+    def test_regular_user_not_allowed(self):
+        resource = factories.Resource()
+        user = factories.User()
+        context = {"user": user["name"], "model": model}
 
-    #     with pytest.raises(tk.NotAuthorized):
-    #         helpers.call_auth("vsg_generate", context, id=resource["id"])
+        with pytest.raises(tk.NotAuthorized):
+            helpers.call_auth("vsg_generate", context, id=resource["id"])
 
     def test_sysadmin(self):
         user = factories.Sysadmin()
