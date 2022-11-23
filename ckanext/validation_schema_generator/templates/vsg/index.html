@@ -29,7 +29,7 @@
     <form method="post" action="{{ h.url_for('validation_schema_generator.index', dataset_id=pkg.name, resource_id=res.id) }}" class="generate-schema-form">
         <button class="btn btn-primary btn-generate" name="generate" type="submit">
             <i class="fa fa-plus"></i>
-            {{ _('Generate JSON data scheme') }}
+            {{ _('Generate JSON data schema') }}
         </button>
 
         <table class="table table-bordered table-schema">
