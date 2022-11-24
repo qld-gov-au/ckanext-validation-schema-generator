@@ -84,8 +84,9 @@ def vsg_update(context, data_dict):
     task['state'] = status
     task['last_updated'] = vsg_utils.get_current_time()
     task['error'] = error
-    task['value']['schema'] = json.loads(
-        data_dict.get("schema", const.EMPTY_SCHEMA))
+
+    if data_dict.get("schema"):
+        task['value']['schema'] = json.loads(data_dict["schema"])
 
     return vsg_utils.update_task(context, task)
 

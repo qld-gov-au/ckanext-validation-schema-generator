@@ -1,7 +1,7 @@
 import requests
 
 from tableschema import infer as ts_infer, TableSchemaException
-from tabulator.exceptions import FormatError
+from tabulator.exceptions import TabulatorException
 
 import ckan.model as model
 import ckan.plugins.toolkit as tk
@@ -52,7 +52,7 @@ def generate_schema_from_resource(input):
             schema = ts_infer(source=source, **options)
     except TableSchemaException as e:
         errors[u'schema'] = str(e)
-    except FormatError as e:
+    except TabulatorException as e:
         errors[u'format'] = str(e)
     except Exception as e:
         errors[u'undefined'] = str(e)

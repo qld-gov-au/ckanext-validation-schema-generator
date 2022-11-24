@@ -48,6 +48,8 @@ def vsg_is_resource_supportable(key, data, errors, context):
 
 def vsg_validate_schema(value, context):
     """Validate table schema"""
+    if not value:
+        return ""
 
     errors = validate_schema(value)
 
