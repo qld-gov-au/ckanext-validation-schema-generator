@@ -8,8 +8,6 @@ import ckan.plugins.toolkit as tk
 import ckan.lib.uploader as uploader
 
 from ckanext.validation_schema_generator.constants import (
-    CF_PASS_AUTH,
-    CF_PASS_AUTH_DF,
     CF_API_KEY,
     TASK_STATE_FINISHED,
     TASK_STATE_ERROR,
@@ -21,9 +19,6 @@ def generate_schema_from_resource(input):
 
     resource = tk.get_action(u'resource_show')(context, {
         'id': input[u'resource_id']
-    })
-    dataset = tk.get_action('package_show')(context, {
-        'id': resource[u'package_id']
     })
 
     errors = {}
@@ -37,8 +32,7 @@ def generate_schema_from_resource(input):
         if isinstance(upload, uploader.ResourceUpload):
             source = upload.get_path(resource[u'id'])
         else:
-            if dataset[u'private'] and _pass_auth_header():
-                options[u'http_session'] = _make_session()
+            options[u'http_session'] = _make_session()
 
     if not source:
         source = resource[u'url']
@@ -77,10 +71,6 @@ def _get_site_user():
         'model': model,
         'ignore_auth': True
     }, {})
-
-
-def _pass_auth_header():
-    return tk.asbool(tk.config.get(CF_PASS_AUTH, CF_PASS_AUTH_DF))
 
 
 def _make_session():
