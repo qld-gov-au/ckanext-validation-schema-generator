@@ -143,11 +143,9 @@ def _apply_res_schema(schema, resource_id):
 
     tk.get_action(u'resource_update')(context, res)
 
-    _unapply_package_schema(resource_id)
-
 
 def _apply_pkg_schema(schema, resource_id):
-    """Apply the generated schema for package and unapply for resource"""
+    """Apply the generated schema for package and resource"""
     context = {"user": "", "ignore_auth": True}
 
     res = tk.get_action(u'resource_show')(context, {u'id': resource_id})
@@ -158,22 +156,16 @@ def _apply_pkg_schema(schema, resource_id):
     if schema:
         for resource in pkg.get('resources', []):
             if resource['id'] == resource_id:
-                resource[const.RES_SCHEMA_FIELD] = ''
+                resource[const.RES_SCHEMA_FIELD] = schema
 
     tk.get_action(u'package_update')(context, pkg)
 
 
 @validate(vsg_schema.vsg_default_schema)
 def vsg_unapply(context, data_dict):
-    """Unapply the schema. Automatically clears the dataset/resource schema if
-    it was using the generated schema.
-
-    :param id: resource ID
-    :type id: string
+    """Unapply the schema
     """
     tk.check_access('vsg_generate', context, data_dict)
-
-    apply_for = data_dict.get(const.APPLY_FOR_FIELD)
 
     task = tk.get_action('vsg_status')(context, data_dict)
 
@@ -188,21 +180,6 @@ def vsg_unapply(context, data_dict):
     if not applied_for:
         raise tk.ValidationError(u"The schema is not applied yet")
 
-    if apply_for == const.APPLY_FOR_DATASET:
-        _unapply_package_schema(data_dict['id'])
-    else:
-        _unapply_resource_schema(data_dict['id'])
-
     task['value'][const.APPLY_FOR_FIELD] = ''
 
     return vsg_utils.update_task(context, task)
-
-
-def _unapply_resource_schema(resource_id):
-    """Unapply resource schema actually means applying an empty one"""
-    _apply_res_schema(const.EMPTY_SCHEMA, resource_id)
-
-
-def _unapply_package_schema(resource_id):
-    """Unapply package schema actually means applying an empty one"""
-    _apply_pkg_schema(const.EMPTY_SCHEMA, resource_id)
