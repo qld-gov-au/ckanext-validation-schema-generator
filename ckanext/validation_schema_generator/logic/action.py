@@ -4,8 +4,8 @@ import ckan.plugins.toolkit as tk
 from ckan.logic import validate
 from ckan.lib.jobs import enqueue as enqueue_job
 
-from ckanext.validation_schema_generator import jobs, utils as vsg_utils, constants as const
 import ckanext.validation_schema_generator.logic.schema as vsg_schema
+from ckanext.validation_schema_generator import jobs, utils as vsg_utils, constants as const
 
 
 def _get_actions():
@@ -119,12 +119,14 @@ def vsg_apply(context, data_dict):
 
     current_schema = task['value']['schema']
 
-    if current_schema != schema:
+    if schema and current_schema != schema:
         task['last_updated'] = vsg_utils.get_current_time()
+
+    schema = schema or current_schema
 
     task['value'][const.APPLY_FOR_FIELD] = apply_for
 
-    task['value']['schema'] = json.loads(schema or current_schema)
+    task['value']['schema'] = vsg_utils.load_schema(schema)
 
     if apply_for == const.APPLY_FOR_DATASET:
         _apply_pkg_schema(schema, data_dict['id'])

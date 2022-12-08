@@ -52,3 +52,15 @@ def validate_schema(schema):
             errors.append(error.message)
 
     return errors
+
+
+def load_schema(value):
+    """If the schema is JSON string - loads it and return,
+    if not - return it as is"""
+
+    try:
+        value = json.loads(value)
+    except (TypeError, ValueError):
+        return value
+
+    return value
