@@ -21,12 +21,10 @@ def vsg_generate_schema(not_missing, vsg_is_resource_supportable,
 
 
 @validator_args
-def vsg_apply_schema(not_missing, resource_id_exists, one_of, ignore_missing,
-                     vsg_validate_schema, unicode_safe):
+def vsg_apply_schema(not_missing, resource_id_exists, one_of):
     return {
         "id": [not_missing, resource_id_exists],
-        "apply_for": [not_missing, one_of(const.APPLY_FOR_OPTIONS)],
-        "schema": [ignore_missing, unicode_safe, vsg_validate_schema]
+        "apply_for": [not_missing, one_of(const.APPLY_FOR_OPTIONS)]
     }
 
 

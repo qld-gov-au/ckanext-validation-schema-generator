@@ -112,8 +112,7 @@ class TestActionApply(object):
                             schema=table_schema)
         helpers.call_action('vsg_apply',
                             id=resource["id"],
-                            apply_for=const.APPLY_FOR_DATASET,
-                            schema=table_schema)
+                            apply_for=const.APPLY_FOR_DATASET)
 
         pkg = helpers.call_action("package_show", id=resource["package_id"])
         assert pkg[const.PKG_SCHEMA_FIELD]
@@ -144,11 +143,8 @@ class TestActionApply(object):
         assert pkg['resources'][0][const.RES_SCHEMA_FIELD]
 
     def test_apply_pkg_must_apply_this_schema_for_resource(self, table_schema):
-        """Applying generated scheam as a default_scheme must apply it to the
-        respective resource too (the one where we've generated this scheme)
-
-        Args:
-            table_schema (_type_): _description_
+        """Applying generated scheam as a default_schema must apply it to the
+        respective resource too (the one where we've generated this schema)
         """
         resource = factories.Resource(datastore_active=True)
 

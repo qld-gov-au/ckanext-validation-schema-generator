@@ -57,7 +57,7 @@
                     <th>{{ _('JSON data schema') }}</th>
 
                     <td class="with-textarea">
-                        {{ form.textarea('schema', id='field-schema', value=task.value.schema, error=error) }}
+                        {{ form.textarea('schema', id='field-schema', value=task.value.schema, error=error, attrs={"disabled": true}) }}
                     </td>
                 </tr>
             {% endif %}

@@ -170,11 +170,10 @@ The extension has next endpoints to manipulate the schema generation process.
     **Returns**
     Updated task data, same as `vsg_status`
 
-4. `vsg_apply` - Apply a generated scheme or a new one. The scheme can be applied only if the generation process is successfully completed.
-    **params**:
+4. `vsg_apply` - Apply a generated schema for a resource or dataset. The schema can be applied only if the generation process is successfully completed.
+    **Params**:
     - `id` (required) - ID of the resource
     - `apply_for` _(required)_- apply for entity, must be one of `["dataset", "resource"]`
-    - `schema` _(optional)_ - a table schema. If not provided, the generated one will be used.
 
 ## License
 

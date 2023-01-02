@@ -118,7 +118,7 @@ class VSGIndexView(MethodView):
         return self._redirect(dataset_id, resource_id)
 
     def apply_schema(self):
-        """Apply a generated schema for resource or dataset"""
+        """Apply a generated schema for a resource or dataset"""
 
         apply_for = self.data[APPLY_FOR_FIELD]
 

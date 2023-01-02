@@ -93,20 +93,17 @@ def vsg_update(context, data_dict):
 
 @validate(vsg_schema.vsg_apply_schema)
 def vsg_apply(context, data_dict):
-    """Apply a generated scheme or a new one. The scheme can be applied only
+    """Apply a generated schema for a resource or dataset. The schema can be applied only
     if the generation process is successfully completed
 
     :param id: resource ID
     :type id: string
     :param apply_for: apply schema agaisnt the whole `dataset` or `resource` only.
     :type apply_for: string
-    :param schema: if the schema is provided, it will replace the generated one (optional)
-    :type schema: string
     """
     tk.check_access('vsg_generate', context, data_dict)
 
     apply_for = data_dict.get(const.APPLY_FOR_FIELD)
-    schema = data_dict.get('schema')
 
     task = tk.get_action('vsg_status')(context, data_dict)
 
@@ -117,16 +114,9 @@ def vsg_apply(context, data_dict):
         raise tk.ValidationError(
             tk._(u"Schema generation failed. Check status."))
 
-    current_schema = task['value']['schema']
-
-    if schema and current_schema != schema:
-        task['last_updated'] = vsg_utils.get_current_time()
-
-    schema = schema or current_schema
-
+    task['last_updated'] = vsg_utils.get_current_time()
     task['value'][const.APPLY_FOR_FIELD] = apply_for
-
-    task['value']['schema'] = vsg_utils.load_schema(schema)
+    schema = vsg_utils.dump_schema(task['value']['schema'])
 
     if apply_for == const.APPLY_FOR_DATASET:
         _apply_pkg_schema(schema, data_dict['id'])

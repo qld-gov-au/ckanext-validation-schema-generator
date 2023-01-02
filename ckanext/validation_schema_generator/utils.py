@@ -64,3 +64,12 @@ def load_schema(value):
         return value
 
     return value
+
+
+def dump_schema(value):
+    """Dump schema if dict, else return as is"""
+
+    if isinstance(value, dict):
+        return json.dumps(value)
+
+    return value
