@@ -52,3 +52,24 @@ def validate_schema(schema):
             errors.append(error.message)
 
     return errors
+
+
+def load_schema(value):
+    """If the schema is JSON string - loads it and return,
+    if not - return it as is"""
+
+    try:
+        value = json.loads(value)
+    except (TypeError, ValueError):
+        return value
+
+    return value
+
+
+def dump_schema(value):
+    """Dump schema if dict, else return as is"""
+
+    if isinstance(value, dict):
+        return json.dumps(value)
+
+    return value

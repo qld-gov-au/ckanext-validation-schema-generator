@@ -14,8 +14,6 @@ VALID_STATES = [
 
 CF_JOB_TIMEOUT = u"ckanext.validation_schema_generator.job_timeout"
 CF_JOB_TIMEOUT_DF = 3600
-CF_PASS_AUTH = u"ckanext.validation_schema_generator.pass_api_key"
-CF_PASS_AUTH_DF = True
 CF_API_KEY = u"ckanext.validation_schema_generator.api_key"
 
 APPLY_FOR_OPTIONS = (u"dataset", u"resource")

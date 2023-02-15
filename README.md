@@ -73,8 +73,12 @@ To install ckanext-validation-schema-generator:
     ckanext.validation_schema_generator.resource_schema_field_name = schema
 
     # Field name for dataset schema field
-    # (optionak, default: schema)
+    # (optional, default: schema)
     ckanext.validation_schema_generator.package_schema_field_name = default_data_schema
+
+    # Allow edit generated schema before apply
+    # (optional, defaukt: False)
+    ckanext.validation_schema_generator.allow_edit_generated_schema = False
 
 
 ## Developer installation
@@ -166,15 +170,10 @@ The extension has next endpoints to manipulate the schema generation process.
     **Returns**
     Updated task data, same as `vsg_status`
 
-4. `vsg_apply` - Apply a generated scheme or a new one. The scheme can be applied only if the generation process is successfully completed.
-    **params**:
+4. `vsg_apply` - Apply a generated schema for a resource or dataset. The schema can be applied only if the generation process is successfully completed.
+    **Params**:
     - `id` (required) - ID of the resource
     - `apply_for` _(required)_- apply for entity, must be one of `["dataset", "resource"]`
-    - `schema` _(optional)_ - a table schema. If not provided, the generated one will be used.
-
-5. `vsg_unapply` - Unapply the schema. Automatically clears the dataset/resource schema if it was using the generated schema.
-    **params**:
-    - `id` (required) - ID of the resource
 
 ## License
 

@@ -112,13 +112,12 @@ class TestActionApply(object):
                             schema=table_schema)
         helpers.call_action('vsg_apply',
                             id=resource["id"],
-                            apply_for=const.APPLY_FOR_DATASET,
-                            schema=table_schema)
+                            apply_for=const.APPLY_FOR_DATASET)
 
         pkg = helpers.call_action("package_show", id=resource["package_id"])
         assert pkg[const.PKG_SCHEMA_FIELD]
 
-    def test_apply_resource_must_unapply_pkg_schema(self, table_schema):
+    def test_apply_resource_must_not_unapply_pkg_schema(self, table_schema):
         resource = factories.Resource(datastore_active=True)
         helpers.call_action('vsg_generate', id=resource['id'])
         helpers.call_action('vsg_update',
@@ -141,9 +140,12 @@ class TestActionApply(object):
 
         pkg = helpers.call_action("package_show", id=resource["package_id"])
         assert pkg[const.PKG_SCHEMA_FIELD]
-        assert not pkg['resources'][0][const.RES_SCHEMA_FIELD]
+        assert pkg['resources'][0][const.RES_SCHEMA_FIELD]
 
-    def test_apply_pkg_must_unapply_resource_schema(self, table_schema):
+    def test_apply_pkg_must_apply_this_schema_for_resource(self, table_schema):
+        """Applying generated scheam as a default_schema must apply it to the
+        respective resource too (the one where we've generated this schema)
+        """
         resource = factories.Resource(datastore_active=True)
 
         helpers.call_action('vsg_generate', id=resource['id'])
@@ -168,14 +170,16 @@ class TestActionApply(object):
         resource = helpers.call_action("resource_show", id=resource["id"])
         pkg = helpers.call_action("package_show", id=resource["package_id"])
 
-        assert not pkg[const.PKG_SCHEMA_FIELD]
-        assert resource[const.RES_SCHEMA_FIELD]
+        assert pkg[const.PKG_SCHEMA_FIELD] == resource[const.RES_SCHEMA_FIELD]
 
 
 @pytest.mark.usefixtures("clean_db", "with_plugins")
 class TestActionUnapply(object):
 
     def test_unapply(self, table_schema):
+        """Unapply doesn't remove the schema from resource or dataset, just
+        changing the task status to indicate, that the generated schema doesn't
+        attached to any entity..."""
         resource = factories.Resource(datastore_active=True)
 
         helpers.call_action('vsg_generate', id=resource['id'])
@@ -194,8 +198,11 @@ class TestActionUnapply(object):
 
         helpers.call_action('vsg_unapply', id=resource["id"])
 
+        task_status = helpers.call_action('vsg_status', id=resource["id"])
+        assert not task_status["value"]["apply_for"]
+
         resource = helpers.call_action("resource_show", id=resource["id"])
-        assert not resource[const.RES_SCHEMA_FIELD]
+        assert resource[const.RES_SCHEMA_FIELD]
 
     def test_unapply_not_applied(self, table_schema):
         resource = factories.Resource(datastore_active=True)
