@@ -67,5 +67,5 @@ def vsg_generation_started(key, data, errors, context):
 
     if result['state'] == const.TASK_STATE_NOT_GENERATED:
         errors[key].append(
-            tk._('The schema generation procecss isn\'t started yet.'))
+            tk._('The schema generation process isn\'t started yet.'))
         raise tk.StopOnError()
