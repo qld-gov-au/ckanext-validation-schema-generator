@@ -239,7 +239,7 @@ class TestActionHook(object):
 
     def test_not_started(self, table_schema):
         resource = factories.Resource(datastore_active=True)
-        err_msg = u"The schema generation procecss isn't started yet."
+        err_msg = u"The schema generation process isn't started yet."
 
         with pytest.raises(tk.ValidationError, match=err_msg):
             helpers.call_action('vsg_update',
