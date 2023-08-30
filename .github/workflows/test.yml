@@ -36,7 +36,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        ckan-version: ["2.10", 2.9, 2.9-py2, 2.8]
+        ckan-version: ["2.10", 2.9, 2.9-py2]
 
     name: CKAN ${{ matrix.ckan-version }}
     runs-on: ubuntu-latest
