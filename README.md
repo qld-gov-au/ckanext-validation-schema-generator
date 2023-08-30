@@ -42,7 +42,7 @@ To install ckanext-validation-schema-generator:
     git clone https://github.com//ckanext-validation-schema-generator.git
     cd ckanext-validation-schema-generator
     pip install -e .
-	pip install -r requirements.txt
+    pip install -r requirements.txt
 
 3. Add `validation-schema-generator` to the `ckan.plugins` setting in your CKAN
    config file (by default the config file is located at

@@ -1,5 +1,7 @@
-import json
+# encoding: utf-8
+
 from datetime import datetime as dt
+import json
 
 from tableschema import validate as ts_validate
 from tableschema import ValidationError as TsValidationError
