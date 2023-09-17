@@ -1,11 +1,13 @@
+# encoding: utf-8
+
 import json
-from ckan.plugins.toolkit import ValidationError
 
 from flask import Blueprint
 from flask.views import MethodView
 
 import ckan.lib.helpers as h
 import ckan.plugins.toolkit as tk
+from ckan.plugins.toolkit import ValidationError
 
 from ckanext.validation_schema_generator.utils import update_task
 from ckanext.validation_schema_generator.constants import (
