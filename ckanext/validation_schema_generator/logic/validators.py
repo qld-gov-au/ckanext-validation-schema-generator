@@ -42,7 +42,7 @@ def vsg_is_resource_supportable(key, data, errors, context):
 
     if not res.extras.get('datastore_active'):
         errors[key].append(
-            tk._('Schema couldn\'t be generated for this resource'))
+            tk._("Schema couldn't be generated for this resource"))
         raise tk.StopOnError()
 
 
