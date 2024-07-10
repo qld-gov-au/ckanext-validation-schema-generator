@@ -10,3 +10,4 @@ splinter>=0.13.0,<0.17
 
 -e git+https://github.com/ckan/ckanext-scheming.git@release-3.0.0#egg=ckanext-scheming
 -e git+https://github.com/qld-gov-au/ckanext-xloader.git@1.0.1-qgov.4#egg=ckanext-xloader
+zipp>=3.19.1 # not directly required, pinned by Snyk to avoid a vulnerability
