@@ -32,17 +32,21 @@ install_requirements () {
     done
 }
 
-. ${APP_DIR}/bin/activate
-
+. "${APP_DIR}"/bin/activate
+if [ "$CKAN_VERSION" = "2.9" ]; then
+    pip install "setuptools>=44.1.0,<71"
+fi
 install_requirements . dev-requirements requirements-dev
 for extension in . `ls -d $SRC_DIR/ckanext-*`; do
     install_requirements $extension requirements pip-requirements
 done
 pip install -e .
+# force version that declares itself to be incompatible but actually works
+pip install click==8.1.7
 installed_name=$(grep '^\s*name=' setup.py |sed "s|[^']*'\([-a-zA-Z0-9]*\)'.*|\1|")
 
 # Validate that the extension was installed correctly.
 if ! pip list | grep "$installed_name" > /dev/null; then echo "Unable to find the extension in the list"; exit 1; fi
 
-. $APP_DIR/bin/process-config.sh
-. ${APP_DIR}/bin/deactivate
+. "${APP_DIR}"/bin/process-config.sh
+. "${APP_DIR}"/bin/deactivate
