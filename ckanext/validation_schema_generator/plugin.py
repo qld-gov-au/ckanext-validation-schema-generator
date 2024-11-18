@@ -10,10 +10,7 @@ import ckan.plugins.toolkit as tk
 from . import helpers
 from .logic import action, auth, validators
 
-if helpers.is_ckan_29():
-    from .flask_plugin import MixinPlugin
-else:
-    from .pylons_plugin import MixinPlugin
+from .flask_plugin import MixinPlugin
 
 
 log = logging.getLogger(__name__)
