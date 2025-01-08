@@ -1,1 +1,1 @@
-tableschema>=1.0.3,<1.20.4
+frictionless==5.18.0
