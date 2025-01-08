@@ -1,11 +1,12 @@
+# encoding: utf-8
+
 import requests
 
-from tableschema import infer as ts_infer, TableSchemaException
-from tabulator.exceptions import TabulatorException
+from frictionless import describe
+from frictionless.errors import SchemaError
 
 import ckan.model as model
 import ckan.plugins.toolkit as tk
-import ckan.lib.uploader as uploader
 
 from ckanext.validation_schema_generator.constants import (
     CF_API_KEY,
@@ -26,28 +27,13 @@ def generate_schema_from_resource(input):
     source = None
     schema = None
 
-    if resource.get(u'url_type') == u'upload':
-        upload = uploader.get_resource_uploader(resource)
-
-        if isinstance(upload, uploader.ResourceUpload):
-            source = upload.get_path(resource[u'id'])
-        else:
-            options[u'http_session'] = _make_session()
-
     if not source:
         source = resource[u'url']
 
     try:
-        if resource.get(u'url_type') == u'upload':
-            schema = ts_infer(source=source,
-                              format=resource['format'].lower(),
-                              **options)
-        else:
-            schema = ts_infer(source=source, **options)
-    except TableSchemaException as e:
+        schema = describe(source, type='schema', **options)
+    except SchemaError as e:
         errors[u'schema'] = str(e)
-    except TabulatorException as e:
-        errors[u'format'] = str(e)
     except Exception as e:
         errors[u'undefined'] = str(e)
     finally:
@@ -95,7 +81,7 @@ def _update_task(input, errors, schema):
         'id': input[u'resource_id'],
         'status': TASK_STATE_ERROR if errors else TASK_STATE_FINISHED,
         'error': errors,
-        'schema': schema or ''
+        'schema': schema.to_json() if schema else ''
     }
 
     tk.get_action('vsg_update')(context, data_dict)
