@@ -5,7 +5,9 @@ Feature: Schema Generation
         Given "TestOrgEditor" as the persona
         When I log in
         And I create a dataset and resource with key-value parameters "notes=package-with-csv-res::private=False" and "upload=default::format=CSV"
+        And I take a debugging screenshot
         And I go to the first resource in the dataset
+        And I take a debugging screenshot
         # Ensure that the datastore is active
         And I reload page every 3 seconds until I see an element with xpath "//*[string() = 'Data Dictionary']" but not more than 6 times
         And I visit resource schema generation page
@@ -37,4 +39,3 @@ Feature: Schema Generation
         Then I should see an element with xpath "//select[@id='field-apply_for']/option[@value=''][1]"
         And I should see an element with xpath "//select[@id='field-apply_for']/option[string()='Dataset default' and not(@selected)]"
         And I should see an element with xpath "//select[@id='field-apply_for']/option[string()='Resource' and not(@selected)]"
-

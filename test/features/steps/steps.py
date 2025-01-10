@@ -64,7 +64,7 @@ def log_in(context):
 @when(u'I expand the browser height')
 def expand_height(context):
     # Work around x=null bug in Selenium set_window_size
-    context.browser.driver.set_window_rect(x=0, y=0, width=1024, height=2048)
+    context.browser.driver.set_window_rect(x=0, y=0, width=1024, height=3072)
 
 
 @when(u'I log in directly')
@@ -75,10 +75,11 @@ def log_in_directly(context):
     :return:
     """
 
-    assert context.persona, "A persona is required to log in, found [{}] in context. Have you configured the personas in before_scenario?".format(context.persona)
+    assert context.persona, "A persona is required to log in, found [{}] in context." \
+        " Have you configured the personas in before_scenario?".format(context.persona)
     context.execute_steps(u"""
         When I attempt to log in with password "$password"
-        Then I should see an element with xpath "//a[@title='Log out']"
+        Then I should see an element with xpath "//*[@title='Log out' or @data-bs-title='Log out']/i[contains(@class, 'fa-sign-out')]"
     """)
 
 
@@ -125,10 +126,18 @@ def clear_url(context):
 
 @when(u'I confirm the dialog containing "{text}" if present')
 def confirm_dialog_if_present(context, text):
-    if context.browser.is_text_present(text):
-        context.execute_steps(u"""
-            When I press the element with xpath "//*[contains(@class, 'modal-dialog')]//button[contains(@class, 'btn-primary')]"
-        """)
+    dialog_xpath = "//*[contains(@class, 'modal-dialog') and contains(string(), '{0}')]".format(text)
+    if context.browser.is_element_present_by_xpath(dialog_xpath):
+        parent_xpath = dialog_xpath
+    elif context.browser.is_text_present(text):
+        parent_xpath = "//div[contains(string(), '{0}')]/..".format(text)
+    else:
+        return
+    button_xpath = parent_xpath + "//button[contains(@class, 'btn-primary')]"
+    context.execute_steps(u"""
+        When I take a debugging screenshot
+        And I press the element with xpath "{0}"
+    """.format(button_xpath))
 
 
 @when(u'I confirm dataset deletion')
@@ -159,9 +168,14 @@ def go_to_new_resource_form(context, name):
         """)
     else:
         # Existing dataset, browse to the resource form
+        if context.browser.is_element_present_by_xpath(
+                "//a[contains(string(), 'Resources') and contains(@href, '/dataset/resources/')]"):
+            context.execute_steps(u"""
+                When I press "Resources"
+            """)
         context.execute_steps(u"""
-            When I press "Resources"
-            And I press "Add new resource"
+            When I press "Add new resource"
+            And I take a debugging screenshot
         """)
 
 
@@ -171,6 +185,7 @@ def title_random_text(context):
     context.execute_steps(u"""
         When I fill in "title" with "Test Title {0}"
         And I fill in "name" with "test-title-{0}" if present
+        And I set "last_generated_title" to "Test Title {0}"
         And I set "last_generated_name" to "test-title-{0}"
     """.format(uuid.uuid4()))
 
@@ -186,6 +201,7 @@ def go_to_dataset_page(context):
 def go_to_dataset(context, name):
     context.execute_steps(u"""
         When I visit "/dataset/{0}"
+        And I take a debugging screenshot
     """.format(name))
 
 
@@ -263,7 +279,7 @@ def fill_in_default_link_resource_fields(context):
 @when(u'I upload "{file_name}" of type "{file_format}" to resource')
 def upload_file_to_resource(context, file_name, file_format):
     context.execute_steps(u"""
-        When I execute the script "$('#resource-upload-button').trigger(click);"
+        When I execute the script "$('#resource-upload-button').trigger('click');"
         And I attach the file "{file_name}" to "upload"
         # Don't quote the injected string since it can have trailing spaces
         And I execute the script "document.getElementById('field-format').value='{file_format}'"
@@ -377,6 +393,8 @@ def _create_dataset_from_params(context, params):
         When I visit "/dataset/new"
         And I fill in default dataset fields
     """)
+    if 'private' not in params:
+        params = params + "::private=False"
     for key, value in _parse_params(params):
         if key == "name":
             # 'name' doesn't need special input, but we want to remember it
@@ -506,7 +524,7 @@ def create_resource_from_params(context, resource_params):
             """.format(key, value))
     context.execute_steps(u"""
         When I take a debugging screenshot
-        And I press the element with xpath "//form[contains(@class, 'resource-form')]//button[contains(@class, 'btn-primary')]"
+        And I press the element with xpath "//form[contains(@data-module, 'resource-form')]//button[contains(@class, 'btn-primary')]"
         And I take a debugging screenshot
     """)
 
@@ -527,12 +545,8 @@ def should_receive_base64_email_containing_texts(context, address, text, text2):
         payload_bytes = quopri.decodestring(payload)
         if len(payload_bytes) > 0:
             payload_bytes += b'='  # do fix the padding error issue
-        if six.PY2:
-            decoded_payload = payload_bytes.decode('base64')
-        else:
-            import base64
-            decoded_payload = six.ensure_text(base64.b64decode(six.ensure_binary(payload_bytes)))
-        print('decoded_payload: ', decoded_payload)
+        decoded_payload = six.ensure_text(base64.b64decode(six.ensure_binary(payload_bytes)))
+        print('Searching for', text, ' and ', text2, ' in decoded_payload: ', decoded_payload)
         return text in decoded_payload and (not text2 or text2 in decoded_payload)
 
     assert context.mail.user_messages(address, filter_contents)
@@ -548,7 +562,7 @@ def go_to_admin_config(context):
 @when(u'I log out')
 def log_out(context):
     context.execute_steps(u"""
-        When I visit "/user/_logout"
+        When I press the element with xpath "//*[@title='Log out' or @data-bs-title='Log out']"
         Then I should see "Log in"
     """)
 
