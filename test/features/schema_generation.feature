@@ -4,9 +4,9 @@ Feature: Schema Generation
     Scenario: As a publisher, when I visit my resource, I can generate a validation schema for it
         Given "TestOrgEditor" as the persona
         When I log in
-        And I create a dataset and resource with key-value parameters "notes=package-with-csv-res::private=False" and "upload=default::format=CSV"
+        And I create a dataset and resource with key-value parameters "notes=package-with-csv-res::schema_json=default" and "name=Resource for schema generation::upload=default::format=CSV"
         And I take a debugging screenshot
-        And I go to the first resource in the dataset
+        And I press "Resource for schema generation"
         And I take a debugging screenshot
         # Ensure that the datastore is active
         And I reload page every 3 seconds until I see an element with xpath "//*[string() = 'Data Dictionary']" but not more than 6 times

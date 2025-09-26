@@ -3,7 +3,7 @@
 import requests
 
 from frictionless import describe
-from frictionless.errors import SchemaError
+from frictionless.exception import FrictionlessException
 
 import ckan.model as model
 import ckan.plugins.toolkit as tk
@@ -32,7 +32,7 @@ def generate_schema_from_resource(input):
 
     try:
         schema = describe(source, type='schema', **options)
-    except SchemaError as e:
+    except FrictionlessException as e:
         errors[u'schema'] = str(e)
     except Exception as e:
         errors[u'undefined'] = str(e)
