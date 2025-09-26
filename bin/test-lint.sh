@@ -4,6 +4,5 @@
 #
 set -e
 
-echo "==> Lint code"
 ahoy lint
 

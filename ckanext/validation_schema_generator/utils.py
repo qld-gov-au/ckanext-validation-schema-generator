@@ -3,8 +3,8 @@
 from datetime import datetime as dt
 import json
 
-from tableschema import validate as ts_validate
-from tableschema import ValidationError as TsValidationError
+from frictionless import Schema
+from frictionless.errors import SchemaError
 
 import ckan.plugins.toolkit as tk
 
@@ -46,10 +46,10 @@ def validate_schema(schema):
     errors = []
 
     try:
-        ts_validate(json.loads(schema))
+        Schema.from_descriptor(json.loads(schema))
     except ValueError as e:
         errors.append(e.message)
-    except TsValidationError as e:
+    except SchemaError as e:
         for error in e.errors:
             errors.append(error.message)
 
