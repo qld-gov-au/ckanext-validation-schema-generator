@@ -14,23 +14,23 @@ sed -i -e "s/##//" docker-compose.yml
 # Pull the latest images.
 ahoy pull
 
-PYTHON=python
+PYTHON=python3
+PYTHON_VERSION=py3
 
 CKAN_GIT_VERSION=$CKAN_VERSION
 CKAN_GIT_ORG=qld-gov-au
+SOLR_VERSION=9
 
-if [ "$CKAN_VERSION" = "2.10" ]; then
-    CKAN_GIT_VERSION=ckan-2.10.1-qgov.1
-    PYTHON_VERSION=py3
-    PYTHON="${PYTHON}3"
-else
-    CKAN_GIT_VERSION=ckan-2.9.9-qgov.3
-    if [ "$CKAN_VERSION" = "2.9-py2" ]; then
-        PYTHON_VERSION=py2
-    else
-        PYTHON_VERSION=py3
-        PYTHON="${PYTHON}3"
-    fi
+if [ "$CKAN_VERSION" = "2.11" ]; then
+    CKAN_GIT_VERSION=ckan-2.11.3
+elif [ "$CKAN_VERSION" = "2.10" ]; then
+    CKAN_GIT_VERSION=ckan-2.10.8
+    SOLR_VERSION=8
+elif [ "$CKAN_VERSION" = "2.9" ]; then
+    CKAN_GIT_VERSION=ckan-2.9.11
+    SOLR_VERSION=8
+elif [ "$CKAN_VERSION" = "master" ]; then
+    CKAN_GIT_ORG=ckan
 fi
 
 sed "s|{CKAN_VERSION}|$CKAN_VERSION|g" .docker/Dockerfile-template.ckan \
@@ -40,4 +40,5 @@ sed "s|{CKAN_VERSION}|$CKAN_VERSION|g" .docker/Dockerfile-template.ckan \
     | sed "s|{PYTHON}|$PYTHON|g" \
     > .docker/Dockerfile.ckan
 
+export SOLR_VERSION
 ahoy build
