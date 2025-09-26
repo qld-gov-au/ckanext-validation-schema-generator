@@ -10,18 +10,24 @@ import ckan.plugins.toolkit as tk
 from . import helpers
 from .logic import action, auth, validators
 
-from .flask_plugin import MixinPlugin
+from .views import vsg
 
 
 log = logging.getLogger(__name__)
 
 
-class ValidationSchemaGeneratorPlugin(MixinPlugin, p.SingletonPlugin):
+class ValidationSchemaGeneratorPlugin(p.SingletonPlugin):
+    p.implements(p.IBlueprint)
     p.implements(p.IConfigurer)
     p.implements(p.IActions)
     p.implements(p.IAuthFunctions)
     p.implements(p.ITemplateHelpers)
     p.implements(p.IValidators)
+
+    # IBlueprint
+
+    def get_blueprint(self):
+        return [vsg]
 
     # IConfigurer
 
