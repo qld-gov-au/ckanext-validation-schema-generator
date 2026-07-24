@@ -12,8 +12,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v6
         with:
           python-version: '3.x'
       - name: Install requirements
@@ -30,15 +30,15 @@ jobs:
         experimental: [false]
         include:
           - ckan-version: 'master'
-            experimental: true  #master is unstable, good to know if we are compatible or not
+            experimental: true  # master is unstable, good to know if we are compatible or not
 
-    name: Test on CKAN ${{ matrix.ckan-version }}
+    name: ${{ matrix.experimental && '**Fail_Ignored** ' || '' }} Test on CKAN ${{ matrix.ckan-version }}
     runs-on: ubuntu-latest
     env:
       CKAN_VERSION: ${{ matrix.ckan-version }}
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         continue-on-error: ${{ matrix.experimental }}
         timeout-minutes: 2
 
@@ -56,14 +56,20 @@ jobs:
         timeout-minutes: 15
         continue-on-error: ${{ matrix.experimental }}
 
-      - name: Unit tests
-        if: ${{ matrix.behave-tag == 'smoke' }}
-        run: bin/test.sh
+      - name: Lint
+        run: ahoy lint
+        timeout-minutes: 2
+        continue-on-error: ${{ matrix.experimental }}
+
+      - name: Unit test
+        run: ahoy test-unit
         timeout-minutes: 10
         continue-on-error: ${{ matrix.experimental }}
 
-      - name: Scenario tests
-        run: bin/test-bdd.sh
+      - name: Scenario test
+        run: |
+          ahoy install-site
+          ahoy test-bdd
         timeout-minutes: 45
         continue-on-error: ${{ matrix.experimental }}
 
@@ -90,7 +96,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: CKAN ${{ matrix.ckan-version }} ${{ matrix.behave-tag }} screenshots
+          name: CKAN ${{ matrix.ckan-version }} screenshots
           path: /tmp/artifacts/behave/screenshots
         timeout-minutes: 1
         continue-on-error: ${{ matrix.experimental }}
