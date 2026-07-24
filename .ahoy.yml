@@ -171,19 +171,19 @@ commands:
         # no tag specified, probably running locally
         # Run reporting tests last so numbers are consistent
         (ahoy cli "behave -no-skipped ${*:-test/features} --tags=smoke" \
-         && ahoy cli "behave $JUNIT_OUTPUT -no-skipped ${*:-test/features} --tags=-smoke --tags=-reporting" \
-         && ahoy cli "behave $JUNIT_OUTPUT -no-skipped ${*:-test/features} --tags=reporting" \
+         && ahoy cli "behave $JUNIT_OUTPUT --no-skipped ${*:-test/features} --tags=-smoke --tags=-reporting" \
+         && ahoy cli "behave $JUNIT_OUTPUT --no-skipped ${*:-test/features} --tags=reporting" \
         ) || [ "${ALLOW_BDD_FAIL:-0}" -eq 1 ]
       elif [ "$BEHAVE_TAG" = "authenticated" ]; then
         # run any tests that don't have a specific tag
         ahoy cli "behave $JUNIT_OUTPUT --no-skipped ${*:-test/features} --tags=-unauthenticated --tags=-smoke --tags=-reporting" \
           || [ "${ALLOW_BDD_FAIL:-0}" -eq 1 ]
         # Run reporting tests last so numbers are consistent
-        ahoy cli "behave $JUNIT_OUTPUT -no-skipped ${*:-test/features} --tags=reporting" || \
+        ahoy cli "behave $JUNIT_OUTPUT --no-skipped ${*:-test/features} --tags=reporting" || \
           [ "${ALLOW_BDD_FAIL:-0}" -eq 1 ]
       else
         # run tests with the specified tag
-        ahoy cli "behave $JUNIT_OUTPUT -no-skipped ${*:-test/features} --tags=$BEHAVE_TAG --tags=-reporting" \
+        ahoy cli "behave $JUNIT_OUTPUT --no-skipped ${*:-test/features} --tags=$BEHAVE_TAG --tags=-reporting" \
           || [ "${ALLOW_BDD_FAIL:-0}" -eq 1 ]
       fi
       ahoy stop-mailmock

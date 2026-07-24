@@ -82,7 +82,7 @@ def log_in(context):
 @when(u'I expand the browser height')
 def expand_height(context):
     # Work around x=null bug in Selenium set_window_size
-    context.browser.driver.set_window_rect(x=0, y=0, width=1024, height=3072)
+    context.browser.driver.set_window_rect(x=0, y=0, width=1366, height=3072)
 
 
 @when(u'I log in directly')
@@ -131,8 +131,8 @@ def request_reset(context):
 @when(u'I fill in "{name}" with "{value}" if present')
 def fill_in_field_if_present(context, name, value):
     context.execute_steps(u"""
-        When I execute the script "field = $('#field-{0}'); if (!field.length) field = $('#{0}'); if (!field.length) field = $('[name={0}]'); field.val('{1}'); field.keyup();"
-    """.format(name, value))
+        When I execute the script "field = $('#{0}'); if (!field.length) field = $('[name={0}]'); if (!field.length) field = $('#field-{0}'); field.val('{1}'); field.keyup();"
+    """.format(name, value.replace("'", r"\'")))
 
 
 @when(u'I clear the URL field')
@@ -148,7 +148,7 @@ def confirm_dialog_if_present(context, text):
     if context.browser.is_element_present_by_xpath(dialog_xpath):
         parent_xpath = dialog_xpath
     elif context.browser.is_text_present(text):
-        parent_xpath = "//div[contains(string(), '{0}')]/..".format(text)
+        parent_xpath = "//div[contains(string(), '{0}')]".format(text)
     else:
         return
     button_xpath = parent_xpath + "//button[contains(@class, 'btn-primary')]"
@@ -169,7 +169,7 @@ def confirm_dataset_deletion_dialog_if_present(context):
         """)
     # Press the Confirm button whether it is in a dialog or a page
     context.execute_steps(u"""
-        When I press the element with xpath "//button[contains(@class, 'btn-primary') and contains(string(), 'Confirm') ]"
+        When I press the element with xpath "//div[@id='content']//button[contains(@class, 'btn-primary') and contains(string(), 'Confirm') ]"
         Then I should see "Dataset has been deleted"
     """)
 
@@ -187,8 +187,8 @@ def go_to_new_resource_form(context, name):
     elif context.browser.is_element_present_by_xpath("//*[contains(string(), 'Add new resource')]"):
         # Existing dataset, browse to the resource form
         context.execute_steps(u"""
-                   When I press "Add new resource"
-               """)
+            When I press "Add new resource"
+        """)
     else:
         # Existing dataset, browse to the resource form
         if context.browser.is_element_present_by_xpath(
@@ -243,6 +243,7 @@ def go_to_dataset(context, name):
 def go_to_first_resource(context):
     context.execute_steps(u"""
         When I press the element with xpath "//li[@class="resource-item"]/a"
+        And I take a debugging screenshot
     """)
 
 
@@ -292,7 +293,7 @@ def enter_resource_url(context, url):
     if url != "default":
         context.execute_steps(u"""
             When I clear the URL field
-            When I execute the script "$('#resource-edit [name=url]').val('{0}')"
+            And I execute the script "$('#resource-edit [name=url]').val('{0}')"
         """.format(url))
 
 
