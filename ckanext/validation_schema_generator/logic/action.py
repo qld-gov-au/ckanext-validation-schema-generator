@@ -1,4 +1,7 @@
+# encoding: utf-8
+
 import json
+import logging
 
 import ckan.plugins.toolkit as tk
 from ckan.logic import validate
@@ -6,6 +9,8 @@ from ckan.lib.jobs import enqueue as enqueue_job
 
 import ckanext.validation_schema_generator.logic.schema as vsg_schema
 from ckanext.validation_schema_generator import jobs, utils as vsg_utils, constants as const
+
+log = logging.getLogger(__name__)
 
 
 def _get_actions():
@@ -118,6 +123,7 @@ def vsg_apply(context, data_dict):
     task['value'][const.APPLY_FOR_FIELD] = apply_for
     schema = vsg_utils.dump_schema(task['value']['schema'])
 
+    log.debug("Applying generated schema to %s: [%s]", apply_for, schema)
     if apply_for == const.APPLY_FOR_DATASET:
         _apply_pkg_schema(schema, data_dict['id'])
     else:

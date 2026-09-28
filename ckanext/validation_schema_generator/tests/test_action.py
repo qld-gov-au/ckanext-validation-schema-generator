@@ -160,7 +160,7 @@ class TestActionApply(object):
                             schema=table_schema)
 
         pkg = helpers.call_action("package_show", id=resource["package_id"])
-        assert pkg[const.PKG_SCHEMA_FIELD]
+        assert pkg.get(const.PKG_SCHEMA_FIELD)
 
         helpers.call_action('vsg_apply',
                             id=resource["id"],
