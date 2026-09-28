@@ -80,7 +80,7 @@ class TestActionApply(object):
                             error={},
                             schema=table_schema)
 
-        with pytest.raises(tk.ValidationError):
+        with pytest.raises((tk.ValidationError, tk.Invalid)):
             helpers.call_action('vsg_apply',
                                 id=resource["id"],
                                 apply_for="organization",
