@@ -113,6 +113,7 @@ class TestActionApply(object):
                             error={},
                             schema=table_schema)
         helpers.call_action('vsg_apply',
+                            context={'defer_commit': False},
                             id=resource["id"],
                             apply_for=const.APPLY_FOR_DATASET)
 
