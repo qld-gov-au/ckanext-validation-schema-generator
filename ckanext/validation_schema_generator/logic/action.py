@@ -1,5 +1,6 @@
 # encoding: utf-8
 
+import datetime
 import json
 import logging
 
@@ -150,6 +151,7 @@ def _apply_pkg_schema(schema, resource_id):
     pkg = tk.get_action(u'package_show')(context, {u'id': res['package_id']})
 
     pkg[const.PKG_SCHEMA_FIELD] = schema
+    pkg['metadata_modified'] = datetime.datetime.utcnow()
 
     if schema:
         for resource in pkg.get('resources', []):
