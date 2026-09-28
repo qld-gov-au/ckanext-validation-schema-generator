@@ -6,7 +6,8 @@ You must define a field for datasets and resources to store a table schema data.
 
 ## Requirements
 
-This extension has been written to work with python 2 and CKAN 2.9.5. Relies on datastore.
+This extension has been written to work with python 3 and CKAN 2.10+.
+It also relies on the datastore being active.
 
 Compatibility with core CKAN versions:
 
