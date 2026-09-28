@@ -3,7 +3,6 @@
 import json
 import logging
 
-from ckan import model
 import ckan.plugins.toolkit as tk
 from ckan.logic import validate
 from ckan.lib.jobs import enqueue as enqueue_job
@@ -158,9 +157,7 @@ def _apply_pkg_schema(schema, resource_id):
                 resource[const.RES_SCHEMA_FIELD] = schema
 
     log.debug("Updating package: %s", pkg.keys())
-    tk.get_action(u'package_update')(context, pkg)
-    model.Session.commit()
-    pkg = tk.get_action(u'package_show')(context, {u'id': res['package_id']})
+    pkg = tk.get_action(u'package_update')(context, pkg)
     log.debug("Updated package: %s", pkg.keys())
 
 
