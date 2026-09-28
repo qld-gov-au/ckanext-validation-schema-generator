@@ -156,7 +156,10 @@ def _apply_pkg_schema(schema, resource_id):
             if resource['id'] == resource_id:
                 resource[const.RES_SCHEMA_FIELD] = schema
 
+    log.debug("Updating package: %s", pkg.keys())
     tk.get_action(u'package_update')(context, pkg)
+    pkg = tk.get_action(u'package_show')(context, {u'id': res['package_id']})
+    log.debug("Updated package: %s", pkg.keys())
 
 
 @validate(vsg_schema.vsg_default_schema)

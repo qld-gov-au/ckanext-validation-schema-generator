@@ -1,5 +1,7 @@
 # encoding: utf-8
 
+import sys
+
 import pytest
 
 import ckan.plugins.toolkit as tk
@@ -115,6 +117,7 @@ class TestActionApply(object):
                             apply_for=const.APPLY_FOR_DATASET)
 
         pkg = helpers.call_action("package_show", id=resource["package_id"])
+        print("Resulting package: %s" % pkg, file=sys.stderr)
         assert pkg.get(const.PKG_SCHEMA_FIELD)
 
     def test_apply_resource_must_not_unapply_pkg_schema(self, table_schema, new_resource):
