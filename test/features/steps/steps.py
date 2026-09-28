@@ -22,7 +22,7 @@ from behaving.web.steps import forms
 if not hasattr(forms, 'fill_in_elem_by_name'):
     forms.fill_in_elem_by_name = forms.i_fill_in_field
 
-URL_RE = re.compile(r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|\
+URL_RE = re.compile(r'http[s]?://(?:[a-zA-Z]|[0-9]|[-$_@.&+]|[!*\(\),]|\
                     (?:%[0-9a-fA-F][0-9a-fA-F]))+', re.I | re.S | re.U)
 
 dataset_default_schema = """
@@ -114,7 +114,7 @@ def attempt_login(context, password):
 @then(u'I should see the login form')
 def login_link_visible(context):
     context.execute_steps(u"""
-        Then I should see an element with xpath "//h1[contains(string(), 'Login')]"
+        Then I should see an element with xpath "//h1[contains(string(), 'Log')]"
     """)
 
 
@@ -275,7 +275,7 @@ def press_edit_resource(context):
 def select_licence(context, licence_id):
     # Licence requires special interaction due to fancy JavaScript
     context.execute_steps(u"""
-        When I execute the script "$('#field-license_id').val('{0}').trigger('change')"
+        When I execute the script "element = document.getElementsByName('license_id')[0]; element.value = '{0}'; element.dispatchEvent(new Event('change'));"
     """.format(licence_id))
 
 
@@ -432,7 +432,7 @@ def _parse_params(param_string):
     for param in param_string.split("::"):
         entry = param.split("=", 1)
         params[entry[0]] = entry[1] if len(entry) > 1 else ""
-    return six.iteritems(params)
+    return params.items()
 
 
 # Enter a JSON schema value
