@@ -115,7 +115,7 @@ class TestActionApply(object):
                             apply_for=const.APPLY_FOR_DATASET)
 
         pkg = helpers.call_action("package_show", id=resource["package_id"])
-        assert pkg[const.PKG_SCHEMA_FIELD]
+        assert pkg.get(const.PKG_SCHEMA_FIELD)
 
     def test_apply_resource_must_not_unapply_pkg_schema(self, table_schema, new_resource):
         resource = new_resource(datastore_active=True)
@@ -131,7 +131,7 @@ class TestActionApply(object):
                             schema=table_schema)
 
         resource = helpers.call_action("resource_show", id=resource["id"])
-        assert resource[const.RES_SCHEMA_FIELD]
+        assert resource.get(const.RES_SCHEMA_FIELD)
 
         helpers.call_action('vsg_apply',
                             id=resource["id"],
@@ -139,8 +139,8 @@ class TestActionApply(object):
                             schema=table_schema)
 
         pkg = helpers.call_action("package_show", id=resource["package_id"])
-        assert pkg[const.PKG_SCHEMA_FIELD]
-        assert pkg['resources'][0][const.RES_SCHEMA_FIELD]
+        assert pkg.get(const.PKG_SCHEMA_FIELD)
+        assert pkg['resources'][0].get(const.RES_SCHEMA_FIELD)
 
     def test_apply_pkg_must_apply_this_schema_for_resource(self, table_schema, new_resource):
         """Applying generated schema as a default_schema must apply it to the
