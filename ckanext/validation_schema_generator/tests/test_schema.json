@@ -1,4 +1,3 @@
-
 {
     "scheming_version": 1,
     "dataset_type": "dataset",
@@ -99,15 +98,15 @@
         "form_placeholder": "eg. January 2011 Gold Prices"
       },
       {
+        "field_name": "format",
+        "label": "Format",
+        "preset": "resource_format_autocomplete"
+      },
+      {
         "field_name": "description",
         "label": "Description",
         "form_snippet": "markdown.html",
         "form_placeholder": "Some useful notes about the data"
-      },
-      {
-        "field_name": "format",
-        "label": "Format",
-        "preset": "resource_format_autocomplete"
       },
       {
         "field_name": "schema",
