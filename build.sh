@@ -1,6 +1,6 @@
 #!/bin/sh
 
-set -e
+set -ex
 
 BASEDIR=$(dirname $0)
 . $BASEDIR/.env
