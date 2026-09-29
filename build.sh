@@ -148,7 +148,7 @@ doctor () {
 create_test_data () {
     # Install test site data.
     title "Installing a fresh site"
-    cli '"${APP_DIR}"/bin/init.sh && "${APP_DIR}"/bin/create-test-data.sh'
+    cli '"${APP_DIR}"/bin/create-test-data.sh'
 }
 
 clean () {
