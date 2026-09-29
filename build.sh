@@ -184,13 +184,13 @@ copy_local_files () {
     # Update files from local repo.
     docker cp . $(docker compose ps -q ckan):/srv/app/
     docker cp bin/ckan_cli $(docker compose ps -q ckan):/usr/bin/
-    cli 'chmod -v u+x /usr/bin/ckan_cli "${APP_DIR}"/bin/*; cp -v .docker/test.ini $CKAN_INI'
+    cli 'chmod -v u+x /usr/bin/ckan_cli "${APP_DIR}"/bin/*; cp -v .docker/test.ini $CKAN_INI; cp -v test.ini ${CKAN_INI}.unit-test'
 }
 
 test_unit () {
     # Run unit tests.
     title 'Run unit tests'
-    cli 'pytest --ckan-ini=${CKAN_INI} --cov=ckanext "${APP_DIR}"/ckanext --junit-xml=test/junit/results.xml' || \
+    cli 'pytest --ckan-ini=${CKAN_INI}.unit-test --cov=ckanext "${APP_DIR}"/ckanext --junit-xml=test/junit/results.xml' || \
     [ "${ALLOW_UNIT_FAIL:-0}" -eq 1 ]
 }
 
