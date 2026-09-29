@@ -11,6 +11,15 @@
           "form_snippet": "resource_schema.html",
           "display_snippet": "resource_schema_link.html"
         }
-     }
+     },
+    {
+        "preset_name": "package_schema",
+        "values": {
+          "validators": "ignore_missing",
+          "output_validators": "scheming_load_json",
+          "form_snippet": "package_schema.html",
+          "display_snippet": "package_schema_link.html"
+        }
+    }
   ]
 }

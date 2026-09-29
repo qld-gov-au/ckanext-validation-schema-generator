@@ -90,6 +90,11 @@
             "form_snippet": null
         },
         {
+            "field_name": "default_data_schema",
+            "label": "Default data schema",
+            "preset": "package_schema"
+        },
+        {
             "field_name": "schema_upload",
             "form_snippet": null,
             "display_snippet": null,
