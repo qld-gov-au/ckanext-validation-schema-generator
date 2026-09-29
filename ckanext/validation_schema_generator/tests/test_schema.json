@@ -81,6 +81,24 @@
         "display_email_name_field": "maintainer"
       },
       {
+          "field_name": "schema_upload",
+          "form_snippet": null,
+          "display_snippet": null,
+          "validators": "ignore_missing"
+      },
+      {
+          "field_name": "schema_json",
+          "form_snippet": null,
+          "display_snippet": null,
+          "validators": "ignore_missing"
+      },
+      {
+          "field_name": "schema_url",
+          "form_snippet": null,
+          "display_snippet": null,
+          "validators": "ignore_missing"
+      },
+      {
         "field_name": "default_data_schema",
         "label": "Default data schema",
         "validators": "ignore_missing"
@@ -108,6 +126,12 @@
         "form_snippet": "markdown.html",
         "form_placeholder": "Some useful notes about the data"
       },
+        {
+            "field_name": "last_modified",
+            "display_snippet": null,
+            "form_snippet": null,
+            "validators": "ignore_empty"
+        },
       {
         "field_name": "schema",
         "label": "Schema",
