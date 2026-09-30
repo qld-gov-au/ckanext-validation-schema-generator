@@ -27,6 +27,7 @@
     {% endif %}
 
     <form method="post" action="{{ h.url_for('validation_schema_generator.index', dataset_id=pkg.name, resource_id=res.id) }}" class="generate-schema-form">
+        {{ h.csrf_input() if 'csrf_input' in h }}
         <button class="btn btn-primary btn-generate" name="generate" type="submit">
             <i class="fa fa-plus"></i>
             {{ _('Generate JSON data schema') }}
