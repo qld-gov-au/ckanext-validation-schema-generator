@@ -45,7 +45,6 @@ pip install 'setuptools>=61.0.0'
 for extension in . `ls -d $SRC_DIR/ckan $SRC_DIR/ckanext-*`; do
     TOOL=uv install_requirements $extension requirements pip-requirements
 done
-pip install .[test]
 install_requirements . dev-requirements requirements-dev
 pip install -e .
 installed_name=$(grep '^\s*name=' setup.py |sed "s|[^']*'\([-a-zA-Z0-9]*\)'.*|\1|")
