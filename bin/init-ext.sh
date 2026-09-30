@@ -41,6 +41,7 @@ install_requirements () {
 }
 
 . "${APP_DIR}"/bin/activate
+pip install 'setuptools>=61.0.0'
 for extension in . `ls -d $SRC_DIR/ckan $SRC_DIR/ckanext-*`; do
     TOOL=uv install_requirements $extension requirements pip-requirements
 done
