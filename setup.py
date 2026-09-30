@@ -82,13 +82,14 @@ setup(
     # To provide executable scripts, use entry points in preference to the
     # "scripts" keyword. Entry points provide cross-platform support and allow
     # pip to create the appropriate form of executable for the target platform.
-    entry_points='''
-        [ckan.plugins]
-        validation_schema_generator=ckanext.validation_schema_generator.plugin:ValidationSchemaGeneratorPlugin
-
-        [babel.extractors]
-        ckan = ckan.lib.extract:extract_ckan
-    ''',
+    entry_points={
+        'console_scripts': [
+            'validation_schema_generator=ckanext.validation_schema_generator.plugin:ValidationSchemaGeneratorPlugin'
+        ],
+        'babel.extractors': [
+            'ckan = ckan.lib.extract:extract_ckan'
+        ]
+    },
 
     # If you are changing from the default layout of your extension, you may
     # have to change the message extractors, you can read more about babel
