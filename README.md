@@ -23,10 +23,7 @@ Compatibility with core CKAN versions:
 
 Suggested values:
 
-* "yes"
-* "not tested" - I can't think of a reason why it wouldn't work
-* "not yet" - there is an intention to get it working
-* "no"
+The last version of this plugin tested on CKAN 2.9 was 2.0.1.
 
 
 ## Installation
