@@ -60,6 +60,8 @@ test = [
     "Unidecode==1.0.*",
     "urllib3>=2.2.2",
     "zipp>=3.19.1",
+    "ckanext-scheming @ git+https://github.com/ckan/ckanext-scheming.git@release-3.1.0",
+    "ckanext-xloader @ git+https://github.com/ckan/ckanext-xloader.git@2.4.0",
 ]
 
 [project.entry-points."ckan.plugins"]
@@ -70,6 +72,28 @@ ckan = "ckan.lib.extract:extract_ckan"
 
 [tool.setuptools.packages]
 find = {}
+
+[tool.babel.extract_messages]
+keywords = ["translate", "isPlural"]
+add_comments = "TRANSLATORS:"
+output_file = "ckanext/validation_schema_generator/i18n/ckanext-validation_schema_generator.pot"
+width = 80
+
+[tool.babel.init_catalog]
+domain = "ckanext-validation_schema_generator"
+input_file = "ckanext/validation_schema_generator/i18n/ckanext-validation_schema_generator.pot"
+output_dir = "ckanext/validation_schema_generator/i18n"
+
+[tool.babel.update_catalog]
+domain = "ckanext-validation_schema_generator"
+input_file = "ckanext/validation_schema_generator/i18n/ckanext-validation_schema_generator.pot"
+output_dir = "ckanext/validation_schema_generator/i18n"
+previous = true
+
+[tool.babel.compile_catalog]
+domain = "ckanext-validation_schema_generator"
+directory = "ckanext/validation_schema_generator/i18n"
+statistics = true
 
 [tool.black]
 line-length = 79

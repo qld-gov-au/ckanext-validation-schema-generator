@@ -89,8 +89,8 @@ do:
 
     git clone https://github.com//ckanext-validation-schema-generator.git
     cd ckanext-validation-schema-generator
-    python setup.py develop
-    pip install -r dev-requirements.txt
+    pip install -e .
+    pip install -e .[test]
 
 
 ## Tests
