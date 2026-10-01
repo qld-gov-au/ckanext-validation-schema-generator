@@ -1,6 +1,5 @@
 # encoding: utf-8
 
-import datetime
 import json
 import logging
 
@@ -151,16 +150,13 @@ def _apply_pkg_schema(schema, resource_id):
     pkg = tk.get_action(u'package_show')(context, {u'id': res['package_id']})
 
     pkg[const.PKG_SCHEMA_FIELD] = schema
-    pkg['metadata_modified'] = datetime.datetime.utcnow()
 
     if schema:
         for resource in pkg.get('resources', []):
             if resource['id'] == resource_id:
                 resource[const.RES_SCHEMA_FIELD] = schema
 
-    log.debug("Updating package: %s", pkg.keys())
-    pkg = tk.get_action(u'package_update')(context, pkg)
-    log.debug("Updated package: %s", pkg.keys())
+    tk.get_action(u'package_update')(context, pkg)
 
 
 @validate(vsg_schema.vsg_default_schema)
