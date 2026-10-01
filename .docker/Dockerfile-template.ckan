@@ -7,12 +7,14 @@ RUN ORIGINAL_USER=$(id -un)
 ARG SITE_URL=http://ckan:5000/
 ENV PYTHON_VERSION={PYTHON_VERSION}
 ENV CKAN_VERSION={CKAN_VERSION}
+ENV SOLR_VERSION={SOLR_VERSION}
 ENV CKAN_SITE_URL="${SITE_URL}"
 ENV PYTHON={PYTHON}
 
 WORKDIR "${APP_DIR}"
 
 COPY .docker/test.ini $CKAN_INI
+COPY test.ini ${CKAN_INI}.unit-test
 
 COPY . "${APP_DIR}"/
 
@@ -22,18 +24,8 @@ COPY bin/ckan_cli /usr/bin/
 
 RUN chmod +x "${APP_DIR}"/bin/*.sh /usr/bin/ckan_cli
 
-RUN which ps || (apt-get update && apt-get install -y procps)
-RUN which psql || apt-get install -y postgresql-client
+RUN (which ps && which psql && which wget) || (apt-get update && apt-get install -y procps postgresql-client wget)
 RUN pip install uv
-
-# Install CKAN.
-
-RUN cd $SRC_DIR/ckan \
-    && git config --global --add safe.directory "$SRC_DIR/ckan" \
-    && git remote set-url origin 'https://github.com/{CKAN_GIT_ORG}/ckan.git' \
-    && git fetch \
-    && git reset --hard && git clean -f \
-    && git checkout '{CKAN_GIT_VERSION}'
 
 USER "$ORIGINAL_USER"
 
