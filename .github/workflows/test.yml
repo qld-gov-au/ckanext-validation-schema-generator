@@ -5,6 +5,7 @@ on:
   pull_request:
     branches:
       - master
+  workflow_call:
 
 jobs:
   # Quick check so we don't waste minutes if there's a Flake8 error
