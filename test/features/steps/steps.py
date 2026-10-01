@@ -22,7 +22,7 @@ from behaving.web.steps import forms
 if not hasattr(forms, 'fill_in_elem_by_name'):
     forms.fill_in_elem_by_name = forms.i_fill_in_field
 
-URL_RE = re.compile(r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|\
+URL_RE = re.compile(r'http[s]?://(?:[a-zA-Z]|[0-9]|[-$_@.&+]|[!*\(\),]|\
                     (?:%[0-9a-fA-F][0-9a-fA-F]))+', re.I | re.S | re.U)
 
 dataset_default_schema = """
@@ -82,7 +82,7 @@ def log_in(context):
 @when(u'I expand the browser height')
 def expand_height(context):
     # Work around x=null bug in Selenium set_window_size
-    context.browser.driver.set_window_rect(x=0, y=0, width=1024, height=3072)
+    context.browser.driver.set_window_rect(x=0, y=0, width=1366, height=3072)
 
 
 @when(u'I log in directly')
@@ -114,7 +114,7 @@ def attempt_login(context, password):
 @then(u'I should see the login form')
 def login_link_visible(context):
     context.execute_steps(u"""
-        Then I should see an element with xpath "//h1[contains(string(), 'Login')]"
+        Then I should see an element with xpath "//h1[contains(string(), 'Log')]"
     """)
 
 
@@ -131,8 +131,8 @@ def request_reset(context):
 @when(u'I fill in "{name}" with "{value}" if present')
 def fill_in_field_if_present(context, name, value):
     context.execute_steps(u"""
-        When I execute the script "field = $('#field-{0}'); if (!field.length) field = $('#{0}'); if (!field.length) field = $('[name={0}]'); field.val('{1}'); field.keyup();"
-    """.format(name, value))
+        When I execute the script "field = $('#{0}'); if (!field.length) field = $('[name={0}]'); if (!field.length) field = $('#field-{0}'); field.val('{1}'); field.keyup();"
+    """.format(name, value.replace("'", r"\'")))
 
 
 @when(u'I clear the URL field')
@@ -148,7 +148,7 @@ def confirm_dialog_if_present(context, text):
     if context.browser.is_element_present_by_xpath(dialog_xpath):
         parent_xpath = dialog_xpath
     elif context.browser.is_text_present(text):
-        parent_xpath = "//div[contains(string(), '{0}')]/..".format(text)
+        parent_xpath = "//div[contains(string(), '{0}')]".format(text)
     else:
         return
     button_xpath = parent_xpath + "//button[contains(@class, 'btn-primary')]"
@@ -169,7 +169,7 @@ def confirm_dataset_deletion_dialog_if_present(context):
         """)
     # Press the Confirm button whether it is in a dialog or a page
     context.execute_steps(u"""
-        When I press the element with xpath "//button[contains(@class, 'btn-primary') and contains(string(), 'Confirm') ]"
+        When I press the element with xpath "//div[@id='content']//button[contains(@class, 'btn-primary') and contains(string(), 'Confirm') ]"
         Then I should see "Dataset has been deleted"
     """)
 
@@ -187,8 +187,8 @@ def go_to_new_resource_form(context, name):
     elif context.browser.is_element_present_by_xpath("//*[contains(string(), 'Add new resource')]"):
         # Existing dataset, browse to the resource form
         context.execute_steps(u"""
-                   When I press "Add new resource"
-               """)
+            When I press "Add new resource"
+        """)
     else:
         # Existing dataset, browse to the resource form
         if context.browser.is_element_present_by_xpath(
@@ -243,6 +243,7 @@ def go_to_dataset(context, name):
 def go_to_first_resource(context):
     context.execute_steps(u"""
         When I press the element with xpath "//li[@class="resource-item"]/a"
+        And I take a debugging screenshot
     """)
 
 
@@ -274,7 +275,7 @@ def press_edit_resource(context):
 def select_licence(context, licence_id):
     # Licence requires special interaction due to fancy JavaScript
     context.execute_steps(u"""
-        When I execute the script "$('#field-license_id').val('{0}').trigger('change')"
+        When I execute the script "element = document.getElementsByName('license_id')[0]; element.value = '{0}'; element.dispatchEvent(new Event('change'));"
     """.format(licence_id))
 
 
@@ -292,7 +293,7 @@ def enter_resource_url(context, url):
     if url != "default":
         context.execute_steps(u"""
             When I clear the URL field
-            When I execute the script "$('#resource-edit [name=url]').val('{0}')"
+            And I execute the script "$('#resource-edit [name=url]').val('{0}')"
         """.format(url))
 
 
@@ -431,7 +432,7 @@ def _parse_params(param_string):
     for param in param_string.split("::"):
         entry = param.split("=", 1)
         params[entry[0]] = entry[1] if len(entry) > 1 else ""
-    return six.iteritems(params)
+    return params.items()
 
 
 # Enter a JSON schema value

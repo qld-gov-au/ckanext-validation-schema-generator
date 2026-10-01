@@ -16,7 +16,7 @@ CF_JOB_TIMEOUT = u"ckanext.validation_schema_generator.job_timeout"
 CF_JOB_TIMEOUT_DF = 3600
 CF_API_KEY = u"ckanext.validation_schema_generator.api_key"
 
-APPLY_FOR_OPTIONS = (u"dataset", u"resource")
+APPLY_FOR_OPTIONS = [u"dataset", u"resource"]
 APPLY_FOR_DATASET = APPLY_FOR_OPTIONS[0]
 APPLY_FOR_RESOURCE = APPLY_FOR_OPTIONS[1]
 APPLY_FOR_FIELD = u"apply_for"

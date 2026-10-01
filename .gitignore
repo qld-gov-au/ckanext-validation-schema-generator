@@ -37,10 +37,12 @@ htmlcov/
 .cache
 nosetests.xml
 coverage.xml
+test/screenshots
 
 # Sphinx documentation
 docs/_build/
+screenshots
 
 # generated from template
 Dockerfile.ckan
-
+docker-compose.yml

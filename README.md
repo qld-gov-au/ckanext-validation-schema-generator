@@ -6,7 +6,8 @@ You must define a field for datasets and resources to store a table schema data.
 
 ## Requirements
 
-This extension has been written to work with python 2 and CKAN 2.9.5. Relies on datastore.
+This extension has been written to work with python 3 and CKAN 2.10+.
+It also relies on the datastore being active.
 
 Compatibility with core CKAN versions:
 
@@ -15,14 +16,14 @@ Compatibility with core CKAN versions:
 | 2.6 and earlier | not tested    |
 | 2.7             | not tested    |
 | 2.8             | not tested    |
-| 2.9.5+           | yes          |
+| 2.9             | not tested    |
+| 2.10            | yes           |
+| 2.11            | yes           |
+| 2.12            | yes           |
 
 Suggested values:
 
-* "yes"
-* "not tested" - I can't think of a reason why it wouldn't work
-* "not yet" - there is an intention to get it working
-* "no"
+The last version of this plugin tested on CKAN 2.9 was 2.0.1.
 
 
 ## Installation
@@ -88,8 +89,8 @@ do:
 
     git clone https://github.com//ckanext-validation-schema-generator.git
     cd ckanext-validation-schema-generator
-    python setup.py develop
-    pip install -r dev-requirements.txt
+    pip install -e .
+    pip install -e .[test]
 
 
 ## Tests
