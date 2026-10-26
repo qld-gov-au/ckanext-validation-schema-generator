@@ -39,3 +39,4 @@ Feature: Schema Generation
         Then I should see an element with xpath "//select[@id='field-apply_for']/option[@value=''][1]"
         And I should see an element with xpath "//select[@id='field-apply_for']/option[string()='Dataset default' and not(@selected)]"
         And I should see an element with xpath "//select[@id='field-apply_for']/option[string()='Resource' and not(@selected)]"
+        And I should see "The schema has been applied"
