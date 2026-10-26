@@ -61,6 +61,7 @@ test = [
     "urllib3>=2.2.2",
     "zipp>=3.19.1",
     "ckanext-scheming @ git+https://github.com/ckan/ckanext-scheming.git@release-3.1.0",
+    "ckanext-validation @ git+https://github.com/qld-gov-au/ckanext-validation.git@0.0.8+qgov.17",
     "ckanext-xloader @ git+https://github.com/ckan/ckanext-xloader.git@2.4.0",
 ]
 
