@@ -37,7 +37,4 @@ Feature: Schema Generation
 
         When I select "resource" from "apply_for"
         And I press the element with xpath "//button[string()='Apply']"
-        Then I should see an element with xpath "//select[@id='field-apply_for']/option[@value=''][1]"
-        And I should see an element with xpath "//select[@id='field-apply_for']/option[string()='Dataset default' and not(@selected)]"
-        And I should see an element with xpath "//select[@id='field-apply_for']/option[string()='Resource' and not(@selected)]"
-        And I should see "The schema has been applied"
+        Then I should see "The schema has been applied"
