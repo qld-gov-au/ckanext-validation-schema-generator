@@ -123,28 +123,32 @@ def vsg_apply(context, data_dict):
     task['value'][const.APPLY_FOR_FIELD] = apply_for
     schema = vsg_utils.dump_schema(task['value']['schema'])
 
-    log.debug("Applying generated schema to %s: [%s]", apply_for, schema)
+    log.debug("%s applying generated schema to %s: [%s]", context.get('user'), apply_for, schema)
     if apply_for == const.APPLY_FOR_DATASET:
-        _apply_pkg_schema(schema, data_dict['id'])
+        _apply_pkg_schema(context, schema, data_dict['id'])
     else:
-        _apply_res_schema(schema, data_dict['id'])
+        _apply_res_schema(context, schema, data_dict['id'])
 
     return vsg_utils.update_task(context, task)
 
 
-def _apply_res_schema(schema, resource_id):
+def _apply_res_schema(context, schema, resource_id):
     """Apply the generated schema for resource and unapply for package"""
-    context = {"user": "", "ignore_auth": True}
+    context = {"user": context.get("user", ""), "ignore_auth": True}
 
     res = tk.get_action(u'resource_show')(context, {u'id': resource_id})
     res[const.RES_SCHEMA_FIELD] = schema
 
-    tk.get_action(u'resource_update')(context, res)
+    try:
+        tk.get_action(u'resource_update')(context, res)
+    except Exception as e:
+        log.error("Error when updating schema on resource %s", resource_id, exc_info=True)
+        raise e
 
 
-def _apply_pkg_schema(schema, resource_id):
+def _apply_pkg_schema(context, schema, resource_id):
     """Apply the generated schema for package and resource"""
-    context = {"user": "", "ignore_auth": True}
+    context = {"user": context.get("user", ""), "ignore_auth": True}
 
     res = tk.get_action(u'resource_show')(context, {u'id': resource_id})
     pkg = tk.get_action(u'package_show')(context, {u'id': res['package_id']})
